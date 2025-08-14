@@ -19,7 +19,7 @@
 	},
 	"peerDependencies": {
 		"@auth/core": "^0.37.3",
-		"astro": ">=4.0.0"
+		"astro": ">=5.0.0"
 	},
 	"devDependencies": {
 		"@auth/core": "^0.37.3",
