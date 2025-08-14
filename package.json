@@ -5,7 +5,7 @@
 	"main": "./index.ts",
 	"types": "module.d.ts",
 	"engines": {
-		"node": ">=17.4"
+		"node": ">=20.0.0"
 	},
 	"license": "MIT",
 	"repository": "https://github.com/nowaythatworked/auth-astro.git",
