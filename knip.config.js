@@ -1,3 +1,3 @@
 module.exports = {
-  ignoreDependencies: ['@semantic-release/.*?'],
-};
+	ignoreDependencies: ['@semantic-release/.*?'],
+}
