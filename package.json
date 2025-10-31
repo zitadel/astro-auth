@@ -2,35 +2,69 @@
 	"name": "auth-astro",
 	"description": "The easiest way to add authentication to your Astro project!",
 	"version": "4.2.0",
-	"main": "./index.ts",
-	"types": "module.d.ts",
-	"engines": {
-		"node": ">=20.0.0"
-	},
-	"license": "MIT",
-	"repository": "https://github.com/nowaythatworked/auth-astro.git",
-	"author": "nowaythatworked <jan.czekala99@web.de>",
-	"contributors": [
-		"Otterlord <otterlord.dev@gmail.com>",
-		"tajkirkpatrick"
+	"type": "module",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"files": [
+		"dist"
 	],
+	"engines": {
+		"node": ">=22.0.0"
+	},
+	"license": "Apache-2.0",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/mridang/auth-astro.git"
+	},
+	"author": {
+		"name": "Mridang Agarwalla",
+		"email": "mridang.agarwalla@gmail.com",
+		"url": "https://github.com/mridang"
+	},
 	"scripts": {
-		"format": "prettier --config .prettierrc --ignore-path .prettierignore -w  ."
+		"prepack": "tsc",
+		"build": "tsc",
+		"test": "jest --verbose --config=jest.config.mjs --runInBand",
+		"test:watch": "npm run test -- --watch",
+		"test:debug": "jest --verbose --config=jest.config.mjs --runInBand --detectOpenHandles",
+		"format": "prettier --write .",
+		"format:check": "prettier --check .",
+		"lint": "npx eslint .",
+		"lint:fix": "npx eslint . --fix"
 	},
 	"peerDependencies": {
-		"@auth/core": "^0.37.3",
+		"@auth/core": ">=0.40.0",
 		"astro": ">=5.0.0"
 	},
 	"devDependencies": {
-		"@auth/core": "^0.37.3",
-		"@types/node": "^18.17.1",
+		"@auth/core": "^0.40.0",
+		"@jest/globals": "^30.0.5",
+		"@mridang/eslint-defaults": "^1.5.0",
+		"@semantic-release/commit-analyzer": "^13.0.1",
+		"@semantic-release/git": "^10.0.1",
+		"@semantic-release/github": "^12.0.0",
+		"@semantic-release/npm": "^13.1.1",
+		"@semantic-release/release-notes-generator": "^14.1.0",
+		"@tsconfig/node22": "^22.0.2",
+		"@types/jest": "30.0.0",
+		"@types/node": "^22.18.13",
+		"@types/qs": "^6.14.0",
 		"@types/set-cookie-parser": "^2.4.2",
+		"@types/supertest": "^6.0.3",
 		"astro": "^5.0.0",
-		"prettier": "^3.6.2",
+		"eslint": "9.32.0",
+		"jest": "30.0.5",
+		"prettier": "3.6.2",
 		"prettier-plugin-astro": "^0.14.1",
-		"typescript": "^5.6.2"
+		"semantic-release": "^25.0.1",
+		"superagent": "^10.2.3",
+		"supertest": "^7.1.4",
+		"testcontainers": "^11.5.0",
+		"ts-jest": "29.4.0",
+		"typescript": "^5.9.3"
 	},
 	"dependencies": {
+		"@auth/core": ">=0.40.0",
 		"set-cookie-parser": "^2.5.1"
 	},
 	"keywords": [
@@ -48,5 +82,10 @@
 		"astro-component",
 		"withastro"
 	],
-	"packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
+	"private": false,
+	"homepage": "https://github.com/mridang/auth-astro",
+	"bugs": "https://github.com/mridang/auth-astro/issues",
+	"publishConfig": {
+		"access": "public"
+	}
 }
