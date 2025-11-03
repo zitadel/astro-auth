@@ -32,5 +32,6 @@ export default {
   extensionsToTreatAsEsm: ['.ts', '.tsx', '.mts'],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
+    '^auth:config$': '<rootDir>/test/__mocks__/auth-config.ts',
   },
 };

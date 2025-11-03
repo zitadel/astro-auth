@@ -1,16 +1,4 @@
-import { describe, expect, it, jest } from '@jest/globals';
-
-// --- Mock for the virtual 'auth:config' module ---
-// This mock is used by any module (like src/server) imported by these tests.
-jest.mock('auth:config', () => ({
-  __esModule: true, // This is important for ES Module mocks
-  default: {
-    prefix: '/api/auth',
-    injectEndpoints: true,
-    // Add any other default config properties your tests might need
-  },
-}));
-// -------------------------------------------------
+import { describe, expect, it } from '@jest/globals';
 
 describe('Package Exports', () => {
   describe('Main Entry Point', () => {
@@ -28,22 +16,12 @@ describe('Package Exports', () => {
       expect(typeof defineConfig).toBe('function');
     });
 
-    it('should export Auth component', async () => {
-      const { Auth } = await import('../src/index');
+    it('should not export components from main entry', async () => {
+      const module = await import('../src/index');
 
-      expect(Auth).toBeDefined();
-    });
-
-    it('should export SignIn component', async () => {
-      const { SignIn } = await import('../src/index');
-
-      expect(SignIn).toBeDefined();
-    });
-
-    it('should export SignOut component', async () => {
-      const { SignOut } = await import('../src/index');
-
-      expect(SignOut).toBeDefined();
+      expect(module).not.toHaveProperty('Auth');
+      expect(module).not.toHaveProperty('SignIn');
+      expect(module).not.toHaveProperty('SignOut');
     });
   });
 
@@ -111,11 +89,9 @@ describe('Package Exports', () => {
       expect(typeof integration.default).toBe('function');
     });
 
-    // --- THIS IS THE FIXED TEST ---
     it('should return AstroIntegration object', async () => {
-      // Changed from 'require' to 'await import'
       const integration = await import('../src/integration');
-      const result = integration.default(); // Access the default export
+      const result = integration.default();
 
       expect(result).toHaveProperty('name');
       expect(result).toHaveProperty('hooks');
