@@ -77,10 +77,15 @@ export interface FullAuthConfig
  *
  * @public
  */
-export const defineConfig = (config: FullAuthConfig): FullAuthConfig => {
-  config.prefix ??= '/api/auth';
-  config.basePath = config.prefix;
-  return config;
+export const defineConfig = (
+  config: Readonly<FullAuthConfig>,
+): FullAuthConfig => {
+  const prefix = config.prefix ?? '/api/auth';
+  return {
+    ...config,
+    prefix,
+    basePath: prefix,
+  };
 };
 
 /**
