@@ -1,18 +1,20 @@
-import type { AuthConfig, Session } from '@auth/core/types'
+import type { AuthConfig, Session } from '@auth/core/types';
 
 /**
  * Re-exported provider types from Auth.js core.
  *
  * @public
  */
-export type { BuiltInProviders } from '@auth/core/providers'
+export type { BuiltInProviders } from '@auth/core/providers';
 
 /**
  * Utility type for string literals with autocomplete support.
  *
  * @internal
  */
-export type LiteralUnion<T extends U, U = string> = T | (U & Record<never, never>)
+export type LiteralUnion<T extends U, U = string> =
+  | T
+  | (U & Record<never, never>);
 
 /**
  * Options for the sign-in flow.
@@ -20,10 +22,10 @@ export type LiteralUnion<T extends U, U = string> = T | (U & Record<never, never
  * @public
  */
 export interface SignInOptions {
-	/** URL to redirect to after successful sign-in */
-	callbackUrl?: string
-	/** Whether to redirect after sign-in */
-	redirect?: boolean
+  /** URL to redirect to after successful sign-in */
+  callbackUrl?: string;
+  /** Whether to redirect after sign-in */
+  redirect?: boolean;
 }
 
 /**
@@ -32,7 +34,7 @@ export interface SignInOptions {
  * @public
  */
 export interface SignInAuthorizationParams {
-	[key: string]: string
+  [key: string]: string;
 }
 
 /**
@@ -41,8 +43,8 @@ export interface SignInAuthorizationParams {
  * @public
  */
 export interface AstroSignInOptions extends SignInOptions {
-	/** Custom auth endpoint prefix */
-	prefix?: string
+  /** Custom auth endpoint prefix */
+  prefix?: string;
 }
 
 /**
@@ -51,10 +53,10 @@ export interface AstroSignInOptions extends SignInOptions {
  * @public
  */
 export interface SignOutParams {
-	/** URL to redirect to after sign-out */
-	callbackUrl?: string
-	/** Whether to redirect after sign-out */
-	redirect?: boolean
+  /** URL to redirect to after sign-out */
+  callbackUrl?: string;
+  /** Whether to redirect after sign-out */
+  redirect?: boolean;
 }
 
 /**
@@ -63,8 +65,8 @@ export interface SignOutParams {
  * @public
  */
 export interface AstroSignOutParams extends SignOutParams {
-	/** Custom auth endpoint prefix */
-	prefix?: string
+  /** Custom auth endpoint prefix */
+  prefix?: string;
 }
 
 /**
@@ -74,11 +76,11 @@ export interface AstroSignOutParams extends SignOutParams {
  *
  * @public
  */
-export type AstroAuthConfig = Omit<AuthConfig, 'raw'>
+export type AstroAuthConfig = Omit<AuthConfig, 'raw'>;
 
 /**
  * Return type for getSession function.
  *
  * @public
  */
-export type GetSessionResult = Promise<Session | null>
+export type GetSessionResult = Promise<Session | null>;

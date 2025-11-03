@@ -1,6 +1,6 @@
 ---
-import type { HTMLAttributes } from 'astro/types'
-import type { SignOutParams } from '../types.js'
+import type { HTMLAttributes } from 'astro/types';
+import type { SignOutParams } from '../types.js';
 
 /**
  * Props for the SignOut component.
@@ -9,26 +9,26 @@ import type { SignOutParams } from '../types.js'
  * options for configuring the sign-out behavior.
  */
 interface Props extends HTMLAttributes<'button'> {
-	/**
-	 * Optional parameters to pass to the signOut function.
-	 *
-	 * These parameters control the sign-out behavior, such as redirect
-	 * URLs and callback handling.
-	 */
-	params?: SignOutParams
+  /**
+   * Optional parameters to pass to the signOut function.
+   *
+   * These parameters control the sign-out behavior, such as redirect
+   * URLs and callback handling.
+   */
+  params?: SignOutParams;
 }
 
 // Generate a unique identifier for this component instance to avoid
 // conflicts when multiple SignOut buttons are present on the same page
-const key = Math.random().toString(36).slice(2, 11)
+const key = Math.random().toString(36).slice(2, 11);
 
 // noinspection JSUnusedGlobalSymbols
-const { params, ...attrs } = Astro.props
-attrs.class = `signout-${key} ${attrs.class ?? ''}`
+const { params, ...attrs } = Astro.props;
+attrs.class = `signout-${key} ${attrs.class ?? ''}`;
 ---
 
 <button {...attrs}>
-	<slot />
+  <slot />
 </button>
 
 <!--
@@ -37,9 +37,9 @@ attrs.class = `signout-${key} ${attrs.class ?? ''}`
   access to the signOut function.
 -->
 <script>
-	import { signOut } from '../client'
-	// @ts-ignore
-	window.signOut = signOut
+  import { signOut } from '../client';
+  // @ts-ignore
+  window.signOut = signOut;
 </script>
 
 <!--
@@ -47,5 +47,7 @@ attrs.class = `signout-${key} ${attrs.class ?? ''}`
   Uses is:inline to silence Astro's warning about define:vars usage.
 -->
 <script is:inline define:vars={{ params, key }}>
-	document.querySelector(`.signout-${key}`)?.addEventListener('click', () => signOut(params))
+  document
+    .querySelector(`.signout-${key}`)
+    ?.addEventListener('click', () => signOut(params));
 </script>

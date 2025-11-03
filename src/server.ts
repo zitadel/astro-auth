@@ -23,46 +23,50 @@
  * npm install @auth/core @auth/astro
  * ```
  */
-import { Auth, createActionURL, setEnvDefaults } from '@auth/core'
-import type { AuthAction } from '@auth/core/types'
-import type { APIContext } from 'astro'
-import authConfig from 'auth:config'
-import type { AstroAuthConfig, GetSessionResult } from './types.ts'
+import { Auth, createActionURL, setEnvDefaults } from '@auth/core';
+import type { AuthAction } from '@auth/core/types';
+import type { APIContext } from 'astro';
+import authConfig from 'auth:config';
+import type { AstroAuthConfig, GetSessionResult } from './types.ts';
+import type Cookie from 'cookie';
 
 const actions: AuthAction[] = [
-	'providers',
-	'session',
-	'csrf',
-	'signin',
-	'signout',
-	'callback',
-	'verify-request',
-	'error',
-]
+  'providers',
+  'session',
+  'csrf',
+  'signin',
+  'signout',
+  'callback',
+  'verify-request',
+  'error',
+];
 
 function AstroAuthHandler(prefix: string, options = authConfig) {
-	return async ({ cookies, request }: APIContext) => {
-		const url = new URL(request.url)
-		const action = url.pathname.slice(prefix.length + 1).split('/')[0] as AuthAction
+  return async ({ cookies, request }: APIContext) => {
+    const url = new URL(request.url);
+    const action = url.pathname
+      .slice(prefix.length + 1)
+      .split('/')[0] as AuthAction;
 
-		if (!actions.includes(action) || !url.pathname.startsWith(prefix + '/')) return
+    if (!actions.includes(action) || !url.pathname.startsWith(prefix + '/'))
+      return;
 
-		const res = await Auth(request, options)
-		if (['callback', 'signin', 'signout'].includes(action)) {
-			// Properly handle multiple Set-Cookie headers (they can't be concatenated in one)
-			// @ts-expect-error since it doesn't work
-			const getSetCookie = res.cookies
-			if (getSetCookie.length > 0) {
-				// @ts-expect-error since it doesn't work
-				res.cookies.forEach((cookie: Cookie) => {
-					const { name, value, options: authOptions } = cookie
-					const { encode, ...astroOptions } = authOptions
-					cookies.set(name, value, astroOptions)
-				})
-			}
-		}
-		return res
-	}
+    const res = await Auth(request, options);
+    if (['callback', 'signin', 'signout'].includes(action)) {
+      // Properly handle multiple Set-Cookie headers (they can't be concatenated in one)
+      // @ts-expect-error since it doesn't work
+      const getSetCookie = res.cookies;
+      if (getSetCookie.length > 0) {
+        // @ts-expect-error since it doesn't work
+        res.cookies.forEach((cookie: Cookie) => {
+          const { name, value, options: authOptions } = cookie;
+          const { ...astroOptions } = authOptions;
+          cookies.set(name, value, astroOptions);
+        });
+      }
+    }
+    return res;
+  };
 }
 
 /**
@@ -84,22 +88,26 @@ function AstroAuthHandler(prefix: string, options = authConfig) {
  * @returns An object with `GET` and `POST` methods that can be exported in an Astro endpoint.
  */
 export function AstroAuth(options = authConfig) {
-	const { AUTH_SECRET, AUTH_TRUST_HOST, VERCEL, NODE_ENV } = import.meta.env
+  const { AUTH_SECRET, AUTH_TRUST_HOST, VERCEL, NODE_ENV } = import.meta.env;
 
-	options.secret ??= AUTH_SECRET
-	options.trustHost ??= !!(AUTH_TRUST_HOST ?? VERCEL ?? NODE_ENV !== 'production')
+  options.secret ??= AUTH_SECRET;
+  options.trustHost ??= !!(
+    AUTH_TRUST_HOST ??
+    VERCEL ??
+    NODE_ENV !== 'production'
+  );
 
-	const { prefix = '/api/auth', ...authOptions } = options
+  const { prefix = '/api/auth', ...authOptions } = options;
 
-	const handler = AstroAuthHandler(prefix, authOptions)
-	return {
-		async GET(context: APIContext) {
-			return await handler(context)
-		},
-		async POST(context: APIContext) {
-			return await handler(context)
-		},
-	}
+  const handler = AstroAuthHandler(prefix, authOptions);
+  return {
+    async GET(context: APIContext) {
+      return await handler(context);
+    },
+    async POST(context: APIContext) {
+      return await handler(context);
+    },
+  };
 }
 
 /**
@@ -121,34 +129,37 @@ export function AstroAuth(options = authConfig) {
  * if (!session) throw new Error ("Not authenticated")
  * ```
  */
-export async function getSession(req: Request, config: AstroAuthConfig): GetSessionResult {
-	setEnvDefaults(process.env, config)
+export async function getSession(
+  req: Request,
+  config: AstroAuthConfig,
+): GetSessionResult {
+  setEnvDefaults(process.env, config);
 
-	const url = createActionURL(
-		'session',
-		new URL(req.url).protocol.replace(':', ''),
-		new Headers(req.headers),
-		process.env,
-		config
-	)
+  const url = createActionURL(
+    'session',
+    new URL(req.url).protocol.replace(':', ''),
+    new Headers(req.headers),
+    process.env,
+    config,
+  );
 
-	const response = await Auth(
-		new Request(url, {
-			headers: {
-				cookie: new Headers(req.headers).get('cookie') ?? '',
-			},
-		}),
-		config
-	)
+  const response = await Auth(
+    new Request(url, {
+      headers: {
+        cookie: new Headers(req.headers).get('cookie') ?? '',
+      },
+    }),
+    config,
+  );
 
-	const { status = 200 } = response
-	const data = await response.json()
+  const { status = 200 } = response;
+  const data = await response.json();
 
-	if (!data || !Object.keys(data).length) {
-		return null
-	} else if (status === 200) {
-		return data
-	} else {
-		throw new Error(data.message)
-	}
+  if (!data || !Object.keys(data).length) {
+    return null;
+  } else if (status === 200) {
+    return data;
+  } else {
+    throw new Error(data.message);
+  }
 }

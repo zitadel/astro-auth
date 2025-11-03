@@ -1,6 +1,6 @@
-import type { AstroIntegration } from 'astro'
-import { dirname, join } from 'node:path'
-import { type AstroAuthConfig, virtualConfigModule } from './config'
+import type { AstroIntegration } from 'astro';
+import { dirname, join } from 'node:path';
+import { type AstroAuthConfig, virtualConfigModule } from './config';
 
 /**
  * Creates an Astro integration for authentication using Auth.js.
@@ -21,38 +21,43 @@ import { type AstroAuthConfig, virtualConfigModule } from './config'
  * @public
  */
 export default (config: AstroAuthConfig = {}): AstroIntegration => ({
-	name: 'astro-auth',
-	hooks: {
-		'astro:config:setup': async ({ config: astroConfig, injectRoute, updateConfig, logger }) => {
-			// Configure Vite to handle the virtual auth config module
-			updateConfig({
-				vite: {
-					plugins: [virtualConfigModule(config.configFile)],
-					optimizeDeps: { exclude: ['auth:config'] },
-				},
-			})
+  name: 'astro-auth',
+  hooks: {
+    'astro:config:setup': async ({
+      config: astroConfig,
+      injectRoute,
+      updateConfig,
+      logger,
+    }) => {
+      // Configure Vite to handle the virtual auth config module
+      updateConfig({
+        vite: {
+          plugins: [virtualConfigModule(config.configFile)],
+          optimizeDeps: { exclude: ['auth:config'] },
+        },
+      });
 
-			// Set default authentication endpoint prefix
-			config.prefix ??= '/api/auth'
+      // Set default authentication endpoint prefix
+      config.prefix ??= '/api/auth';
 
-			// Inject authentication routes unless explicitly disabled
-			if (config.injectEndpoints !== false) {
-				const currentDir = dirname(import.meta.url.replace('file://', ''))
-				const entrypoint = join(currentDir, 'api', '[...auth].ts')
+      // Inject authentication routes unless explicitly disabled
+      if (config.injectEndpoints !== false) {
+        const currentDir = dirname(import.meta.url.replace('file://', ''));
+        const entrypoint = join(currentDir, 'api', '[...auth].ts');
 
-				injectRoute({
-					pattern: `${config.prefix}/[...auth]`,
-					entrypoint,
-				})
-			}
+        injectRoute({
+          pattern: `${config.prefix}/[...auth]`,
+          entrypoint,
+        });
+      }
 
-			// Validate that an adapter is configured for server-side rendering
-			if (!astroConfig.adapter) {
-				logger.error(
-					'No adapter found. Authentication requires server-side ' +
-						'rendering. Please add an adapter to your Astro config.'
-				)
-			}
-		},
-	},
-})
+      // Validate that an adapter is configured for server-side rendering
+      if (!astroConfig.adapter) {
+        logger.error(
+          'No adapter found. Authentication requires server-side ' +
+            'rendering. Please add an adapter to your Astro config.',
+        );
+      }
+    },
+  },
+});

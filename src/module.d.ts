@@ -26,13 +26,13 @@
  * module resolution, not runtime code.
  */
 declare module '*.astro' {
-	import type { AstroComponentFactory } from 'astro'
-	const Component: AstroComponentFactory
-	// Default export provides type information for Astro component imports.
-	// IDEs cannot detect usage in ambient module declarations, resulting
-	// in false positive unused export warnings.
-	// noinspection JSUnusedGlobalSymbols
-	export default Component
+  import type { AstroComponentFactory } from 'astro';
+  const Component: AstroComponentFactory;
+  // Default export provides type information for Astro component imports.
+  // IDEs cannot detect usage in ambient module declarations, resulting
+  // in false positive unused export warnings.
+  // noinspection JSUnusedGlobalSymbols
+  export default Component;
 }
 
 /**
@@ -93,10 +93,10 @@ declare module '*.astro' {
  * ```
  */
 declare module 'auth:config' {
-	const config: import('./config').FullAuthConfig
-	// Default export is consumed by the virtual module system and imported
-	// throughout the plugin via 'auth:config'. IDEs cannot trace virtual
-	// module usage, resulting in false positive unused export warnings.
-	// noinspection JSUnusedGlobalSymbols
-	export default config
+  const config: import('./config').FullAuthConfig;
+  // Default export is consumed by the virtual module system and imported
+  // throughout the plugin via 'auth:config'. IDEs cannot trace virtual
+  // module usage, resulting in false positive unused export warnings.
+  // noinspection JSUnusedGlobalSymbols
+  export default config;
 }

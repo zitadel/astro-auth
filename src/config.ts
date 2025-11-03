@@ -1,5 +1,5 @@
-import type { PluginOption } from 'vite'
-import type { AuthConfig } from '@auth/core/types'
+import type { PluginOption } from 'vite';
+import type { AuthConfig } from '@auth/core/types';
 
 /**
  * Configuration options specific to the Astro integration.
@@ -7,40 +7,40 @@ import type { AuthConfig } from '@auth/core/types'
  * @public
  */
 export interface AstroAuthConfig {
-	/**
-	 * Base path for authentication routes.
-	 *
-	 * @defaultValue '/api/auth'
-	 *
-	 * @example
-	 * ```js
-	 * authAstro({ prefix: '/auth' })
-	 * // Routes will be available at /auth/signin, /auth/signout, etc.
-	 * ```
-	 */
-	prefix?: string
+  /**
+   * Base path for authentication routes.
+   *
+   * @defaultValue '/api/auth'
+   *
+   * @example
+   * ```js
+   * authAstro({ prefix: '/auth' })
+   * // Routes will be available at /auth/signin, /auth/signout, etc.
+   * ```
+   */
+  prefix?: string;
 
-	/**
-	 * Whether the integration should automatically inject authentication
-	 * endpoints.
-	 *
-	 * Set to `false` if you want to manually define authentication routes.
-	 *
-	 * @defaultValue true
-	 */
-	injectEndpoints?: boolean
+  /**
+   * Whether the integration should automatically inject authentication
+   * endpoints.
+   *
+   * Set to `false` if you want to manually define authentication routes.
+   *
+   * @defaultValue true
+   */
+  injectEndpoints?: boolean;
 
-	/**
-	 * Path to the authentication configuration file.
-	 *
-	 * @defaultValue './auth.config'
-	 *
-	 * @example
-	 * ```js
-	 * authAstro({ configFile: './config/authentication.ts' })
-	 * ```
-	 */
-	configFile?: string
+  /**
+   * Path to the authentication configuration file.
+   *
+   * @defaultValue './auth.config'
+   *
+   * @example
+   * ```js
+   * authAstro({ configFile: './config/authentication.ts' })
+   * ```
+   */
+  configFile?: string;
 }
 
 /**
@@ -49,7 +49,9 @@ export interface AstroAuthConfig {
  *
  * @public
  */
-export interface FullAuthConfig extends AstroAuthConfig, Omit<AuthConfig, 'raw'> {}
+export interface FullAuthConfig
+  extends AstroAuthConfig,
+    Omit<AuthConfig, 'raw'> {}
 
 /**
  * Helper function to define authentication configuration with type safety.
@@ -76,10 +78,10 @@ export interface FullAuthConfig extends AstroAuthConfig, Omit<AuthConfig, 'raw'>
  * @public
  */
 export const defineConfig = (config: FullAuthConfig): FullAuthConfig => {
-	config.prefix ??= '/api/auth'
-	config.basePath = config.prefix
-	return config
-}
+  config.prefix ??= '/api/auth';
+  config.basePath = config.prefix;
+  return config;
+};
 
 /**
  * Creates a Vite virtual module plugin for auth configuration.
@@ -93,21 +95,23 @@ export const defineConfig = (config: FullAuthConfig): FullAuthConfig => {
  *
  * @internal
  */
-export const virtualConfigModule = (configFile: string = './auth.config'): PluginOption => {
-	const virtualModuleId = 'auth:config'
-	const resolvedId = '\0' + virtualModuleId
+export const virtualConfigModule = (
+  configFile: string = './auth.config',
+): PluginOption => {
+  const virtualModuleId = 'auth:config';
+  const resolvedId = '\0' + virtualModuleId;
 
-	return {
-		name: 'auth-astro-config',
-		resolveId: (id) => {
-			if (id === virtualModuleId) {
-				return resolvedId
-			}
-		},
-		load: (id) => {
-			if (id === resolvedId) {
-				return `import authConfig from "${configFile}"; export default authConfig`
-			}
-		},
-	}
-}
+  return {
+    name: 'auth-astro-config',
+    resolveId: (id) => {
+      if (id === virtualModuleId) {
+        return resolvedId;
+      }
+    },
+    load: (id) => {
+      if (id === resolvedId) {
+        return `import authConfig from "${configFile}"; export default authConfig`;
+      }
+    },
+  };
+};

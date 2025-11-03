@@ -1,15 +1,18 @@
 {
-	"extends": "astro/tsconfigs/base",
-	"compilerOptions": {
-		"types": ["astro/client"],
-		"moduleResolution": "bundler",
-		"allowImportingTsExtensions": false,
-		"noEmit": false,
-		"declaration": true,
-		"declarationMap": true,
-		"outDir": "./dist",
-		"rootDir": "./src"
-	},
-	"include": ["src/**/*"],
-	"exclude": ["node_modules", "**/*.spec.ts", "dist", "test", ".astro"]
+  "extends": "astro/tsconfigs/base",
+  "compilerOptions": {
+    "types": ["astro/client"],
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": false,
+    "noEmit": false,
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "paths": {
+      "auth:config": ["src/module.d.ts"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "**/*.spec.ts", "dist", "test", ".astro"]
 }

@@ -1,5 +1,5 @@
-import { AstroAuth } from '../server'
+import { AstroAuth } from '../server';
 
-export const prerender = false
+export const prerender = false;
 
-export const { GET, POST } = AstroAuth()
+export const { GET, POST } = AstroAuth();
