@@ -24,7 +24,6 @@
  * ```
  */
 import { Auth, createActionURL, setEnvDefaults } from '@auth/core';
-import type { AuthAction } from '@auth/core/types';
 import type { APIContext } from 'astro';
 import authConfig from 'auth:config';
 import type { AstroAuthConfig, GetSessionResult } from './types';
@@ -33,25 +32,20 @@ import type Cookie from 'cookie';
 function AstroAuthHandler(prefix: string, options = authConfig) {
   return async ({ cookies, request }: APIContext) => {
     const url = new URL(request.url);
-    const action = url.pathname
-      .slice(prefix.length + 1)
-      .split('/')[0] as AuthAction;
-
-    if (!url.pathname.startsWith(prefix + '/')) return;
+    if (!url.pathname.startsWith(prefix + '/')) {
+      return;
+    }
 
     const res = await Auth(request, options);
-    if (['callback', 'signin', 'signout'].includes(action)) {
-      // Properly handle multiple Set-Cookie headers (they can't be concatenated in one)
+    // @ts-expect-error since it doesn't work
+    const setCookies = res.cookies;
+    if (setCookies && setCookies.length > 0) {
       // @ts-expect-error since it doesn't work
-      const getSetCookie = res.cookies;
-      if (getSetCookie.length > 0) {
-        // @ts-expect-error since it doesn't work
-        res.cookies.forEach((cookie: Cookie) => {
-          const { name, value, options: authOptions } = cookie;
-          const { ...astroOptions } = authOptions;
-          cookies.set(name, value, astroOptions);
-        });
-      }
+      res.cookies.forEach((cookie: Cookie) => {
+        const { name, value, options: authOptions } = cookie;
+        const { ...astroOptions } = authOptions;
+        cookies.set(name, value, astroOptions);
+      });
     }
     return res;
   };
