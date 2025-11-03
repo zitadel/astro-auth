@@ -24,30 +24,32 @@ const key = Math.random().toString(36).slice(2, 11);
 
 // noinspection JSUnusedGlobalSymbols
 const { params, ...attrs } = Astro.props;
-attrs.class = `signout-${key} ${attrs.class ?? ''}`;
+attrs.class = `signout-button ${attrs.class ?? ''}`;
 ---
 
-<button {...attrs}>
+<button
+  {...attrs}
+  data-signout-key={key}
+  data-signout-params={params ? JSON.stringify(params) : undefined}
+>
   <slot />
 </button>
 
-<!--
-  Make the signOut function globally available for inline scripts.
-  This is necessary because the event listener script below needs
-  access to the signOut function.
--->
 <script>
   import { signOut } from '../client';
-  // @ts-ignore
-  window.signOut = signOut;
-</script>
 
-<!--
-  Attach click event listener to trigger sign-out flow.
-  Uses is:inline to silence Astro's warning about define:vars usage.
--->
-<script is:inline define:vars={{ params, key }}>
-  document
-    .querySelector(`.signout-${key}`)
-    ?.addEventListener('click', () => signOut(params));
+  // Attach event listeners to all sign-out buttons
+  document.querySelectorAll('[data-signout-key]').forEach((button) => {
+    if (button instanceof HTMLElement && !button.dataset.signoutInitialized) {
+      button.dataset.signoutInitialized = 'true';
+
+      button.addEventListener('click', () => {
+        const params = button.dataset.signoutParams
+          ? JSON.parse(button.dataset.signoutParams)
+          : undefined;
+
+        signOut(params);
+      });
+    }
+  });
 </script>
