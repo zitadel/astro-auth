@@ -1,6 +1,4 @@
 module.exports = {
 	ignoreDependencies: ['@semantic-release/.*?', 'auth'],
-	entry: [
-		'src/api/**/*.ts'
-	],
+	entry: ['src/api/**/*.ts'],
 }

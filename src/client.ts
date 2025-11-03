@@ -1,4 +1,9 @@
-import type { AstroSignInOptions, AstroSignOutParams, LiteralUnion, SignInAuthorizationParams, } from './types.ts'
+import type {
+	AstroSignInOptions,
+	AstroSignOutParams,
+	LiteralUnion,
+	SignInAuthorizationParams,
+} from './types.ts'
 
 /**
  * Initiates a sign-in flow for the specified authentication provider.
