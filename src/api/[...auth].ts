@@ -1,4 +1,4 @@
-import { AstroAuth } from '../../server'
+import { AstroAuth } from '../server'
 
 export const prerender = false
 

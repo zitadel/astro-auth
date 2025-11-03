@@ -2,12 +2,27 @@
 import type { HTMLAttributes } from 'astro/types'
 import type { SignOutParams } from '../types.js'
 
+/**
+ * Props for the SignOut component.
+ *
+ * Extends standard HTML button attributes with authentication-specific
+ * options for configuring the sign-out behavior.
+ */
 interface Props extends HTMLAttributes<'button'> {
+	/**
+	 * Optional parameters to pass to the signOut function.
+	 *
+	 * These parameters control the sign-out behavior, such as redirect
+	 * URLs and callback handling.
+	 */
 	params?: SignOutParams
 }
 
+// Generate a unique identifier for this component instance to avoid
+// conflicts when multiple SignOut buttons are present on the same page
 const key = Math.random().toString(36).slice(2, 11)
 
+// noinspection JSUnusedGlobalSymbols
 const { params, ...attrs } = Astro.props
 attrs.class = `signout-${key} ${attrs.class ?? ''}`
 ---
@@ -16,12 +31,23 @@ attrs.class = `signout-${key} ${attrs.class ?? ''}`
 	<slot />
 </button>
 
+<!--
+  Make the signOut function globally available for inline scripts.
+  This is necessary because the event listener script below needs
+  access to the signOut function.
+-->
 <script>
-	import { signOut } from '../../client'
+	import { signOut } from '../client'
 	// @ts-ignore
 	window.signOut = signOut
 </script>
 
-<script define:vars={{ params, key }}>
-	document.querySelector(`.signout-${key}`)?.addEventListener('click', () => signOut(params))
+<!--
+  Attach click event listener to trigger sign-out flow.
+  Uses is:inline to silence Astro's warning about define:vars usage.
+-->
+<script is:inline define:vars={{ params, key }}>
+	document
+		.querySelector(`.signout-${key}`)
+		?.addEventListener('click', () => signOut(params))
 </script>

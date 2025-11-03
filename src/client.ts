@@ -1,10 +1,10 @@
-import type { BuiltInProviderType, RedirectableProviderType } from '@auth/core/providers'
+import type {} from /* BuiltInProviderType, RedirectableProviderType removed */ '@auth/core/providers'
 import type {
 	SignInAuthorizationParams,
 	LiteralUnion,
 	AstroSignInOptions,
 	AstroSignOutParams,
-} from './src/types.ts'
+} from './types.ts'
 
 /**
  * Client-side method to initiate a signin flow
@@ -13,10 +13,8 @@ import type {
  *
  * [Documentation](https://authjs.dev/reference/utilities/#signin)
  */
-export async function signIn<P extends RedirectableProviderType | undefined = undefined>(
-	providerId?: LiteralUnion<
-		P extends RedirectableProviderType ? P | BuiltInProviderType : BuiltInProviderType
-	>,
+export async function signIn<P extends string | undefined = undefined>(
+	providerId?: LiteralUnion<P extends string ? P | string : string>,
 	options?: AstroSignInOptions,
 	authorizationParams?: SignInAuthorizationParams
 ) {

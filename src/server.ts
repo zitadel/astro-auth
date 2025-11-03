@@ -23,11 +23,12 @@
  * npm install @auth/core @auth/astro
  * ```
  */
-import { Auth } from '@auth/core'
-import type { AuthAction, Session } from '@auth/core/types'
+import { Auth, createActionURL, setEnvDefaults } from '@auth/core'
+import type { AuthAction } from '@auth/core/types'
 import type { APIContext } from 'astro'
-import { parseString } from 'set-cookie-parser'
 import authConfig from 'auth:config'
+import type { Cookie } from '@auth/core/lib/utils/cookie'
+import type { AstroAuthConfig, GetSessionResult } from './types.ts'
 
 const actions: AuthAction[] = [
 	'providers',
@@ -50,14 +51,13 @@ function AstroAuthHandler(prefix: string, options = authConfig) {
 		const res = await Auth(request, options)
 		if (['callback', 'signin', 'signout'].includes(action)) {
 			// Properly handle multiple Set-Cookie headers (they can't be concatenated in one)
-			const getSetCookie = res.headers.getSetCookie()
+			const getSetCookie = res.cookies
 			if (getSetCookie.length > 0) {
-				getSetCookie.forEach((cookie) => {
-					const { name, value, ...options } = parseString(cookie)
-					// Astro's typings are more explicit than @types/set-cookie-parser for sameSite
-					cookies.set(name, value, options as Parameters<(typeof cookies)['set']>[2])
+				res.cookies.forEach((cookie: Cookie) => {
+					const { name, value, options: authOptions } = cookie
+					const { encode, ...astroOptions } = authOptions
+					cookies.set(name, value, astroOptions)
 				})
-				res.headers.delete('Set-Cookie')
 			}
 		}
 		return res
@@ -102,21 +102,52 @@ export function AstroAuth(options = authConfig) {
 }
 
 /**
- * Fetches the current session.
- * @param req The request object.
- * @returns The current session, or `null` if there is no session.
+ * Retrieves the current session for a Request.
+ *
+ * This function extracts session information from the request cookies and
+ * validates it against the Auth.js configuration. It returns the session
+ * object if valid or null if no valid session exists.
+ *
+ * @param req - The Request object
+ * @param config - The authentication configuration
+ * @returns Promise resolving to session data or null
+ *
+ * @throws {Error} When session validation fails or Auth.js returns an error
+ *
+ * @example
+ * ```ts
+ * const session = await getSession(request, authConfig)
+ * if (!session) throw new Error ("Not authenticated")
+ * ```
  */
-export async function getSession(req: Request, options = authConfig): Promise<Session | null> {
-	options.secret ??= import.meta.env.AUTH_SECRET
-	options.trustHost ??= true
+export async function getSession(req: Request, config: AstroAuthConfig): GetSessionResult {
+	setEnvDefaults(process.env, config)
 
-	const url = new URL(`${options.prefix}/session`, req.url)
-	const response = await Auth(new Request(url, { headers: req.headers }), options)
+	const url = createActionURL(
+		'session',
+		new URL(req.url).protocol.replace(':', ''),
+		new Headers(req.headers),
+		process.env,
+		config
+	)
+
+	const response = await Auth(
+		new Request(url, {
+			headers: {
+				cookie: new Headers(req.headers).get('cookie') ?? '',
+			},
+		}),
+		config
+	)
+
 	const { status = 200 } = response
-
 	const data = await response.json()
 
-	if (!data || !Object.keys(data).length) return null
-	if (status === 200) return data
-	throw new Error(data.message)
+	if (!data || !Object.keys(data).length) {
+		return null
+	} else if (status === 200) {
+		return data
+	} else {
+		throw new Error(data.message)
+	}
 }

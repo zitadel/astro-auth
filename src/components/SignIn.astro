@@ -1,16 +1,48 @@
 ---
 import type { HTMLAttributes } from 'astro/types'
-import type { BuiltInProviders, SignInOptions, SignInAuthorizationParams } from '../types.js'
+import type {
+	BuiltInProviders,
+	SignInOptions,
+	SignInAuthorizationParams,
+} from '../types.js'
 
+/**
+ * Props for the SignIn component.
+ *
+ * Extends standard HTML button attributes with authentication-specific
+ * options for configuring the sign-in behavior.
+ */
 interface Props extends HTMLAttributes<'button'> {
-	/** The authentication provider to sign in with. */
+	/**
+	 * The authentication provider to sign in with.
+	 *
+	 * Can be a built-in provider (e.g., 'google', 'github') or a custom
+	 * provider identifier.
+	 */
 	provider?: BuiltInProviders | string
+
+	/**
+	 * Additional options to pass to the signIn function.
+	 *
+	 * These options control the sign-in behavior, such as redirect URLs
+	 * and callback handling.
+	 */
 	options?: SignInOptions
+
+	/**
+	 * Authorization parameters to pass to the authentication provider.
+	 *
+	 * These are provider-specific parameters that customize the
+	 * authentication flow.
+	 */
 	authParams?: SignInAuthorizationParams
 }
 
+// Generate a unique identifier for this component instance to avoid
+// conflicts when multiple SignIn buttons are present on the same page
 const key = Math.random().toString(36).slice(2, 11)
 
+// noinspection JSUnusedGlobalSymbols
 const { provider, options, authParams, ...attrs } = Astro.props
 attrs.class = `signin-${key} ${attrs.class ?? ''}`
 ---
@@ -19,14 +51,25 @@ attrs.class = `signin-${key} ${attrs.class ?? ''}`
 	<slot />
 </button>
 
+<!--
+  Make signIn function globally available for inline scripts.
+  This is necessary because the event listener script below needs
+  access to the signIn function.
+-->
 <script>
-	import { signIn } from '../../client'
+	import { signIn } from '../client'
 	// @ts-ignore
 	window.signIn = signIn
 </script>
 
-<script define:vars={{ provider, options, authParams, key }}>
+<!--
+  Attach click event listener to trigger sign-in flow.
+  Uses is:inline to silence Astro's warning about define:var usage.
+-->
+<script is:inline define:vars={{ provider, options, authParams, key }}>
 	document
 		.querySelector(`.signin-${key}`)
-		?.addEventListener('click', () => signIn(provider, options, authParams))
+		?.addEventListener('click', () =>
+			signIn(provider, options, authParams)
+		)
 </script>

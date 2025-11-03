@@ -1,17 +1,34 @@
 ---
-import { getSession } from '../../server'
+import { getSession } from '../server'
 import { type FullAuthConfig } from '../config'
 import authDefaultConfig from 'auth:config'
 
+/**
+ * Props for the Session component.
+ *
+ * Allows overriding the authentication configuration for retrieving
+ * session data.
+ */
 interface Props {
+	/**
+	 * Optional authentication configuration override.
+	 *
+	 * If not provided, uses the default configuration from the
+	 * auth:config virtual module.
+	 */
 	authConfig?: FullAuthConfig
 }
 
 const { authConfig = authDefaultConfig } = Astro.props as Props
 
+// Retrieve the current session using the provided or default auth config
 let session = await getSession(Astro.request, authConfig)
 ---
 
+<!--
+  Render the default slot with session data passed as an argument.
+  This allows child components to access session information.
+-->
 <div>
 	<Fragment set:html={Astro.slots.render('default', [session])} />
 </div>

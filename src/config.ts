@@ -27,7 +27,7 @@ export interface AstroAuthConfig {
 	 */
 	prefix?: string
 	/**
-	 * Defineds wether or not you want the integration to handle the API routes
+	 * Defines whether you want the integration to handle the API routes
 	 * @default true
 	 */
 	injectEndpoints?: boolean
