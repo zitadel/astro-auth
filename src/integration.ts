@@ -1,6 +1,7 @@
 import type { AstroIntegration } from 'astro';
 import { dirname, join } from 'node:path';
 import { type AstroAuthConfig, virtualConfigModule } from './config';
+import { fileURLToPath } from 'node:url';
 
 /**
  * Creates an Astro integration for authentication using Auth.js.
@@ -42,8 +43,9 @@ export default (config: AstroAuthConfig = {}): AstroIntegration => ({
 
       // Inject authentication routes unless explicitly disabled
       if (config.injectEndpoints !== false) {
-        const currentDir = dirname(import.meta.url.replace('file://', ''));
-        const entrypoint = join(currentDir, 'api', '[...auth].ts');
+        const entrypoint = fileURLToPath(
+          new URL('./api/[...auth].ts', import.meta.url),
+        );
 
         injectRoute({
           pattern: `${config.prefix}/[...auth]`,
