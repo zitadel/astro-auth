@@ -47,7 +47,5 @@ attrs.class = `signout-${key} ${attrs.class ?? ''}`
   Uses is:inline to silence Astro's warning about define:vars usage.
 -->
 <script is:inline define:vars={{ params, key }}>
-	document
-		.querySelector(`.signout-${key}`)
-		?.addEventListener('click', () => signOut(params))
+	document.querySelector(`.signout-${key}`)?.addEventListener('click', () => signOut(params))
 </script>

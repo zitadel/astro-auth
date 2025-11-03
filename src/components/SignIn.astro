@@ -1,10 +1,6 @@
 ---
 import type { HTMLAttributes } from 'astro/types'
-import type {
-	BuiltInProviders,
-	SignInOptions,
-	SignInAuthorizationParams,
-} from '../types.js'
+import type { BuiltInProviders, SignInOptions, SignInAuthorizationParams } from '../types.js'
 
 /**
  * Props for the SignIn component.
@@ -69,7 +65,5 @@ attrs.class = `signin-${key} ${attrs.class ?? ''}`
 <script is:inline define:vars={{ provider, options, authParams, key }}>
 	document
 		.querySelector(`.signin-${key}`)
-		?.addEventListener('click', () =>
-			signIn(provider, options, authParams)
-		)
+		?.addEventListener('click', () => signIn(provider, options, authParams))
 </script>
