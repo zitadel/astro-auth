@@ -27,7 +27,6 @@ import { Auth, createActionURL, setEnvDefaults } from '@auth/core'
 import type { AuthAction } from '@auth/core/types'
 import type { APIContext } from 'astro'
 import authConfig from 'auth:config'
-import type { Cookie } from '@auth/core/lib/utils/cookie'
 import type { AstroAuthConfig, GetSessionResult } from './types.ts'
 
 const actions: AuthAction[] = [
@@ -51,8 +50,10 @@ function AstroAuthHandler(prefix: string, options = authConfig) {
 		const res = await Auth(request, options)
 		if (['callback', 'signin', 'signout'].includes(action)) {
 			// Properly handle multiple Set-Cookie headers (they can't be concatenated in one)
+			// @ts-ignore
 			const getSetCookie = res.cookies
 			if (getSetCookie.length > 0) {
+				// @ts-ignore
 				res.cookies.forEach((cookie: Cookie) => {
 					const { name, value, options: authOptions } = cookie
 					const { encode, ...astroOptions } = authOptions

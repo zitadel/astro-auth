@@ -5,6 +5,12 @@
 	"type": "module",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		}
+	},
 	"files": [
 		"dist"
 	],
@@ -34,7 +40,8 @@
 	},
 	"peerDependencies": {
 		"@auth/core": ">=0.40.0",
-		"astro": ">=5.0.0"
+		"astro": ">=5.0.0",
+		"vite": "^6.0.0 || ^7.0.0"
 	},
 	"devDependencies": {
 		"@auth/core": "^0.40.0",

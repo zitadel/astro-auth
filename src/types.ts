@@ -1,47 +1,84 @@
-/**
- * Shared authentication types for auth-astro
- *
- * These types maintain backward compatibility with next-auth interfaces
- * while working with @auth/core
- */
-
 import type { AuthConfig, Session } from '@auth/core/types'
 
+/**
+ * Re-exported provider types from Auth.js core.
+ *
+ * @public
+ */
 export type { BuiltInProviders } from '@auth/core/providers'
+
+/**
+ * Utility type for string literals with autocomplete support.
+ *
+ * @internal
+ */
 export type LiteralUnion<T extends U, U = string> = T | (U & Record<never, never>)
 
+/**
+ * Options for the sign-in flow.
+ *
+ * @public
+ */
 export interface SignInOptions {
+	/** URL to redirect to after successful sign-in */
 	callbackUrl?: string
+	/** Whether to redirect after sign-in */
 	redirect?: boolean
 }
 
+/**
+ * Authorization parameters passed to the OAuth provider.
+ *
+ * @public
+ */
 export interface SignInAuthorizationParams {
 	[key: string]: string
 }
 
+/**
+ * Astro-specific sign-in options extending base options.
+ *
+ * @public
+ */
 export interface AstroSignInOptions extends SignInOptions {
-	prefix?: string
-}
-
-export interface SignOutParams {
-	callbackUrl?: string
-	redirect?: boolean
-}
-
-export interface AstroSignOutParams extends SignOutParams {
+	/** Custom auth endpoint prefix */
 	prefix?: string
 }
 
 /**
- * Define a public Astro config that cannot select the internal overload.
+ * Options for the sign-out flow.
  *
- * The type excludes the `raw` property so that calls to `Auth` resolve to the
- * `Promise<Response>` signature. This alias should be used for all Astro code
- * paths that invoke `Auth`.
+ * @public
+ */
+export interface SignOutParams {
+	/** URL to redirect to after sign-out */
+	callbackUrl?: string
+	/** Whether to redirect after sign-out */
+	redirect?: boolean
+}
+
+/**
+ * Astro-specific sign-out options extending base options.
+ *
+ * @public
+ */
+export interface AstroSignOutParams extends SignOutParams {
+	/** Custom auth endpoint prefix */
+	prefix?: string
+}
+
+/**
+ * Authentication configuration for Astro integration.
+ *
+ * Excludes internal Auth.js properties not relevant to Astro usage.
+ *
+ * @public
  */
 export type AstroAuthConfig = Omit<AuthConfig, 'raw'>
 
 /**
- * Promise that resolves to a session or null if no session exists.
+ * Return type for getSession function.
+ *
+ * @public
  */
 export type GetSessionResult = Promise<Session | null>
