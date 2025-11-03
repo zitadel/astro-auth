@@ -51,11 +51,9 @@ export default (config: AstroAuthConfig = {}): AstroIntegration => ({
         });
       }
 
-      // Validate that an adapter is configured for server-side rendering
       if (!astroConfig.adapter) {
-        logger.error(
-          'No adapter found. Authentication requires server-side ' +
-            'rendering. Please add an adapter to your Astro config.',
+        throw new Error(
+          'No adapter found. Authentication requires server-side rendering. Please add an adapter to your Astro config.',
         );
       }
     },
