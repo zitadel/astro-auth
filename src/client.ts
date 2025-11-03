@@ -6,6 +6,32 @@ import type {
 } from './types.ts';
 
 /**
+ * Retrieves a CSRF token from the authentication endpoint.
+ *
+ * @param prefix - The authentication base path.
+ * @returns A promise that resolves to the CSRF token string.
+ * @throws {Error} When the request fails, returns non-JSON, or lacks a token.
+ * @private
+ */
+async function __getCsrfToken(prefix: string): Promise<string> {
+  const res = await fetch(`${prefix}/csrf`);
+  if (!res.ok) {
+    throw new Error('Failed to fetch CSRF token');
+  }
+  let json: unknown;
+  try {
+    json = await res.json();
+  } catch {
+    throw new Error('CSRF endpoint returned non-JSON response');
+  }
+  const token = (json as { csrfToken?: string })?.csrfToken;
+  if (!token) {
+    throw new Error('Missing CSRF token');
+  }
+  return token;
+}
+
+/**
  * Initiates a sign-in flow for the specified authentication provider.
  *
  * This client-side function handles the complete sign-in process, including
@@ -103,9 +129,10 @@ export async function signIn<P extends string | undefined = undefined>(
     signInUrlWithParams = `${signInUrl}?${params}`;
   }
 
-  // Retrieve CSRF token for request protection
-  const csrfTokenResponse = await fetch(`${prefix}/csrf`);
-  const { csrfToken } = await csrfTokenResponse.json();
+  const csrfToken: string = await __getCsrfToken(prefix);
+  if (!csrfToken) {
+    throw new Error('Missing CSRF token');
+  }
 
   const res = await fetch(signInUrlWithParams, {
     method: 'post',
@@ -184,9 +211,10 @@ export async function signOut(options?: AstroSignOutParams): Promise<void> {
     }
   }
 
-  // Retrieve CSRF token for request protection
-  const csrfTokenResponse = await fetch(`${prefix}/csrf`);
-  const { csrfToken } = await csrfTokenResponse.json();
+  const csrfToken: string = await __getCsrfToken(prefix);
+  if (!csrfToken) {
+    throw new Error('Missing CSRF token');
+  }
 
   const res = await fetch(`${prefix}/signout`, {
     method: 'post',
