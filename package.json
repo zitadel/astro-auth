@@ -41,7 +41,7 @@
   },
   "scripts": {
     "prepack": "tsc",
-    "build": "tsc",
+    "build": "tsup",
     "test": "jest --verbose --config=jest.config.mjs --runInBand",
     "test:watch": "npm run test -- --watch",
     "test:debug": "jest --verbose --config=jest.config.mjs --runInBand --detectOpenHandles",
@@ -76,6 +76,7 @@
     "prettier-plugin-astro": "^0.14.1",
     "semantic-release": "^25.0.1",
     "ts-jest": "29.4.0",
+    "tsup": "^8.5.0",
     "typescript": "^5.9.3"
   },
   "keywords": [

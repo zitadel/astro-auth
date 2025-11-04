@@ -13,6 +13,6 @@
       "auth:config": ["./src/module.d.ts"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*.ts", "src/**/*.d.ts"],
   "exclude": ["node_modules", "**/*.spec.ts", "dist", "test", ".astro"]
 }

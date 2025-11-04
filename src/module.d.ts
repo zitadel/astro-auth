@@ -1,5 +1,3 @@
-// src/module.d.ts
-
 /**
  * Ambient module declarations for the astro-auth plugin.
  *
@@ -26,13 +24,9 @@
  * module resolution, not runtime code.
  */
 declare module '*.astro' {
-  import type { AstroComponentFactory } from 'astro';
-  const Component: AstroComponentFactory;
-  // Default export provides type information for Astro component imports.
-  // IDEs cannot detect usage in ambient module declarations, resulting
-  // in false positive unused export warnings.
-  // noinspection JSUnusedGlobalSymbols
-  export default Component;
+  import type { AstroComponentFactory } from 'astro/runtime/server/index.js';
+  const component: AstroComponentFactory;
+  export default component;
 }
 
 /**
