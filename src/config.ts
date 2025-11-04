@@ -56,7 +56,7 @@ export interface FullAuthConfig
 /**
  * Environment variables structure used by Auth.js configuration.
  *
- * @internal
+ * @public
  */
 export interface AuthEnvVars {
   AUTH_SECRET?: string;
@@ -95,7 +95,7 @@ export interface AuthEnvVars {
  * const env = getEnvVars({ AUTH_SECRET: 'test-secret' })
  * ```
  */
-export const getEnvVars = (envOverride?: AuthEnvVars): AuthEnvVars => {
+const getEnvVars = (envOverride?: AuthEnvVars): AuthEnvVars => {
   if (envOverride) {
     return envOverride;
   }

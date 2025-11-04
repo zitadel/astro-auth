@@ -68,6 +68,7 @@
     "@types/node": "^22.18.13",
     "@typescript-eslint/parser": "^8.46.2",
     "astro": "^5.0.0",
+    "esbuild": "^0.25.12",
     "eslint": "9.32.0",
     "eslint-plugin-astro": "^1.4.0",
     "jest": "30.0.5",
