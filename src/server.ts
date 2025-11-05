@@ -43,6 +43,10 @@ function AstroAuthHandler(prefix: string, options = authConfig) {
 /**
  * Creates a set of Astro endpoints for authentication.
  *
+ * @param options - The configuration for authentication providers and other options.
+ * @returns An object with `GET` and `POST` methods that can be exported in an Astro endpoint.
+ * @throws {Error} When auth configuration is not found or not properly configured.
+ *
  * @example
  * ```ts
  * export const { GET, POST } = AstroAuth({
@@ -55,8 +59,6 @@ function AstroAuthHandler(prefix: string, options = authConfig) {
  *   debug: false,
  * })
  * ```
- * @param config The configuration for authentication providers and other options.
- * @returns An object with `GET` and `POST` methods that can be exported in an Astro endpoint.
  */
 export function AstroAuth(options = authConfig) {
   const config = options ?? authConfig;
@@ -88,7 +90,6 @@ export function AstroAuth(options = authConfig) {
  * @param req - The Request object
  * @param config - The authentication configuration
  * @returns Promise resolving to session data or null
- *
  * @throws {Error} When session validation fails or Auth.js returns an error
  *
  * @example

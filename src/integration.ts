@@ -12,6 +12,7 @@ import { fileURLToPath } from 'node:url';
  *
  * @param config - Configuration options for the integration
  * @returns Configured Astro integration
+ * @throws {Error} When no adapter is configured (server-side rendering is required).
  *
  * @remarks
  * This integration requires server-side rendering. Ensure you have
