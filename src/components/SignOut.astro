@@ -42,21 +42,25 @@ attrs.class = `signout-button ${attrs.class ?? ''}`;
     if (button instanceof HTMLElement && !button.dataset.signoutInitialized) {
       button.dataset.signoutInitialized = 'true';
 
-      button.addEventListener('click', () => {
-        // Guard JSON parsing to prevent errors from malformed data
-        let params;
+      button.addEventListener(
+        'click',
+        () => {
+          // Guard JSON parsing to prevent errors from malformed data
+          let params;
 
-        try {
-          params = button.dataset.signoutParams
-            ? JSON.parse(button.dataset.signoutParams)
-            : undefined;
-        } catch (e) {
-          console.warn('[astro-auth] Invalid signout params JSON:', e);
-          params = undefined;
-        }
+          try {
+            params = button.dataset.signoutParams
+              ? JSON.parse(button.dataset.signoutParams)
+              : undefined;
+          } catch (e) {
+            console.warn('[astro-auth] Invalid signout params JSON:', e);
+            params = undefined;
+          }
 
-        signOut(params);
-      });
+          signOut(params);
+        },
+        { passive: true, capture: true },
+      );
     }
   }
 

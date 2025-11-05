@@ -1,7 +1,7 @@
 ---
 import type { HTMLAttributes } from 'astro/types';
 import type {
-  BuiltInProviderType,
+  BuiltInProviders,
   SignInOptions,
   SignInAuthorizationParams,
 } from '../types';
@@ -19,7 +19,7 @@ interface Props extends HTMLAttributes<'button'> {
    * Can be a built-in provider (e.g., 'google', 'github') or a custom
    * provider identifier.
    */
-  provider?: BuiltInProviderType | string;
+  provider?: BuiltInProviders | string;
 
   /**
    * Additional options to pass to the signIn function.
@@ -64,33 +64,37 @@ attrs.class = `signin-button ${attrs.class ?? ''}`;
     if (button instanceof HTMLElement && !button.dataset.signinInitialized) {
       button.dataset.signinInitialized = 'true';
 
-      button.addEventListener('click', () => {
-        const provider = button.dataset.signinProvider;
+      button.addEventListener(
+        'click',
+        () => {
+          const provider = button.dataset.signinProvider;
 
-        // Guard JSON parsing to prevent errors from malformed data
-        let options;
-        let authParams;
+          // Guard JSON parsing to prevent errors from malformed data
+          let options;
+          let authParams;
 
-        try {
-          options = button.dataset.signinOptions
-            ? JSON.parse(button.dataset.signinOptions)
-            : undefined;
-        } catch (e) {
-          console.warn('[astro-auth] Invalid signin options JSON:', e);
-          options = undefined;
-        }
+          try {
+            options = button.dataset.signinOptions
+              ? JSON.parse(button.dataset.signinOptions)
+              : undefined;
+          } catch (e) {
+            console.warn('[astro-auth] Invalid signin options JSON:', e);
+            options = undefined;
+          }
 
-        try {
-          authParams = button.dataset.signinAuthParams
-            ? JSON.parse(button.dataset.signinAuthParams)
-            : undefined;
-        } catch (e) {
-          console.warn('[astro-auth] Invalid signin authParams JSON:', e);
-          authParams = undefined;
-        }
+          try {
+            authParams = button.dataset.signinAuthParams
+              ? JSON.parse(button.dataset.signinAuthParams)
+              : undefined;
+          } catch (e) {
+            console.warn('[astro-auth] Invalid signin authParams JSON:', e);
+            authParams = undefined;
+          }
 
-        signIn(provider, options, authParams);
-      });
+          signIn(provider, options, authParams);
+        },
+        { passive: true, capture: true },
+      );
     }
   }
 
