@@ -141,6 +141,7 @@ describe('signIn', () => {
         Accept: 'application/json',
         'Content-Type': 'application/x-www-form-urlencoded',
         'X-Auth-Return-Redirect': '1',
+        'X-Requested-With': 'XMLHttpRequest',
       });
 
       const bodyString = requestInit?.body?.toString() ?? '';
@@ -474,6 +475,7 @@ describe('signOut', () => {
         Accept: 'application/json',
         'Content-Type': 'application/x-www-form-urlencoded',
         'X-Auth-Return-Redirect': '1',
+        'X-Requested-With': 'XMLHttpRequest',
       });
 
       const bodyString = requestInit?.body?.toString() ?? '';
@@ -495,7 +497,7 @@ describe('signOut', () => {
 
       expect(typedFetchMock.mock.calls[0]?.[0]).toBe('/custom-auth/csrf');
       expect(typedFetchMock.mock.calls[1]?.[0]).toBe('/custom-auth/signout');
-      expect(assignSpy).toHaveBeenCalledWith('/signout-page');
+      expect(assignSpy).toHaveBeenCalledWith('http://localhost/signout-page');
     });
 
     it('should use custom callbackUrl', async () => {
@@ -511,7 +513,7 @@ describe('signOut', () => {
       const body = new URLSearchParams(bodyString);
       expect(body.get('callbackUrl')).toBe('/goodbye');
 
-      expect(assignSpy).toHaveBeenCalledWith('/login');
+      expect(assignSpy).toHaveBeenCalledWith('http://localhost/login');
     });
 
     it('should combine custom prefix and callbackUrl', async () => {
@@ -527,7 +529,7 @@ describe('signOut', () => {
 
       expect(typedFetchMock.mock.calls[0]?.[0]).toBe('/custom-api/csrf');
       expect(typedFetchMock.mock.calls[1]?.[0]).toBe('/custom-api/signout');
-      expect(assignSpy).toHaveBeenCalledWith('/goodbye');
+      expect(assignSpy).toHaveBeenCalledWith('http://localhost/goodbye');
     });
   });
 

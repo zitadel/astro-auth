@@ -44,6 +44,20 @@ function __normalizePathOnly(href: string): string {
   }
 }
 
+function __safeRedirect(
+  target: string | null | undefined,
+  fallbackPathOnly: string,
+): string {
+  if (!target) return fallbackPathOnly;
+  try {
+    const u = new URL(target, window.location.origin);
+    if (u.origin !== window.location.origin) return fallbackPathOnly;
+    return u.href;
+  } catch {
+    return fallbackPathOnly;
+  }
+}
+
 export async function signIn<P extends string | undefined = undefined>(
   providerId?: LiteralUnion<P extends string ? P | string : string>,
   options?: AstroSignInOptions,
@@ -107,6 +121,7 @@ export async function signIn<P extends string | undefined = undefined>(
       Accept: 'application/json',
       'Content-Type': 'application/x-www-form-urlencoded',
       'X-Auth-Return-Redirect': '1',
+      'X-Requested-With': 'XMLHttpRequest',
     },
     body: new URLSearchParams({
       ...opts,
@@ -124,7 +139,8 @@ export async function signIn<P extends string | undefined = undefined>(
   const error = data.url ? new URL(data.url).searchParams.get('error') : null;
 
   if (redirect !== false || !isSupportingReturn || !error) {
-    const target = data.url ?? (res.redirected ? res.url : callbackUrl);
+    const candidate = data.url ?? (res.redirected ? res.url : undefined);
+    const target = __safeRedirect(candidate, callbackUrl);
     window.location.assign(target);
 
     if (target && target.includes('#')) {
@@ -161,6 +177,7 @@ export async function signOut(options?: AstroSignOutParams): Promise<void> {
       Accept: 'application/json',
       'Content-Type': 'application/x-www-form-urlencoded',
       'X-Auth-Return-Redirect': '1',
+      'X-Requested-With': 'XMLHttpRequest',
     },
     body: new URLSearchParams({
       csrfToken,
@@ -174,7 +191,8 @@ export async function signOut(options?: AstroSignOutParams): Promise<void> {
   } catch {
     // ignore non-JSON
   }
-  const url = data.url ?? (res.redirected ? res.url : callbackUrl);
+  const candidate = data.url ?? (res.redirected ? res.url : undefined);
+  const url = __safeRedirect(candidate, callbackUrl);
 
   window.location.assign(url);
 
