@@ -107,13 +107,17 @@ describe('CSRF Token Handling', () => {
   it('should throw if CSRF response has no csrfToken field', async () => {
     typedFetchMock.mockResponseOnce(JSON.stringify({ some: 'data' }));
 
-    await expect(signIn('github')).rejects.toThrow('Missing CSRF token');
+    await expect(signIn('github')).rejects.toThrow(
+      'Missing or invalid CSRF token',
+    );
   });
 
   it('should throw if CSRF token is empty string', async () => {
     typedFetchMock.mockResponseOnce(JSON.stringify({ csrfToken: '' }));
 
-    await expect(signIn('github')).rejects.toThrow('Missing CSRF token');
+    await expect(signIn('github')).rejects.toThrow(
+      'Missing or invalid CSRF token',
+    );
   });
 });
 
@@ -309,9 +313,12 @@ describe('signIn', () => {
       expect(assignSpy).not.toHaveBeenCalled();
       expect(reloadSpy).not.toHaveBeenCalled();
       expect(response).toBeDefined();
+      expect(response).toBeInstanceOf(Response);
 
-      const data = await response?.json();
-      expect(data?.url).toBe(errorUrl);
+      if (response) {
+        const data = await response.json();
+        expect(data?.url).toBe(errorUrl);
+      }
     });
 
     it('should redirect even with redirect: false when no error', async () => {
@@ -345,9 +352,12 @@ describe('signIn', () => {
 
       expect(assignSpy).not.toHaveBeenCalled();
       expect(response).toBeDefined();
+      expect(response).toBeInstanceOf(Response);
 
-      const data = await response?.json();
-      expect(data?.url).toBe(errorUrl);
+      if (response) {
+        const data = await response.json();
+        expect(data?.url).toBe(errorUrl);
+      }
     });
 
     it('should use signin endpoint for email provider', async () => {

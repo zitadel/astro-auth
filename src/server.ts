@@ -59,7 +59,13 @@ function AstroAuthHandler(prefix: string, options = authConfig) {
  * @returns An object with `GET` and `POST` methods that can be exported in an Astro endpoint.
  */
 export function AstroAuth(options = authConfig) {
-  const { prefix = '/api/auth', ...authOptions } = options;
+  const config = options ?? authConfig;
+  if (!config) {
+    throw new Error(
+      'Auth configuration not found. Please ensure auth.config is properly configured.',
+    );
+  }
+  const { prefix = '/api/auth', ...authOptions } = config;
 
   const handler = AstroAuthHandler(prefix, authOptions);
   return {

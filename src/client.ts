@@ -17,8 +17,8 @@ async function __getCsrfToken(prefix: string): Promise<string> {
     throw new Error('CSRF endpoint returned non-JSON response');
   }
   const token = (json as { csrfToken?: string })?.csrfToken;
-  if (!token) {
-    throw new Error('Missing CSRF token');
+  if (typeof token !== 'string' || token.length === 0) {
+    throw new Error('Missing or invalid CSRF token');
   }
   return token;
 }
@@ -27,7 +27,7 @@ export async function signIn<P extends string | undefined = undefined>(
   providerId?: LiteralUnion<P extends string ? P | string : string>,
   options?: AstroSignInOptions,
   authorizationParams?: SignInAuthorizationParams,
-) {
+): Promise<Response | void> {
   let callbackUrl = window.location.href;
   let redirect = true;
 
@@ -70,9 +70,6 @@ export async function signIn<P extends string | undefined = undefined>(
   }
 
   const csrfToken: string = await __getCsrfToken(prefix);
-  if (!csrfToken) {
-    throw new Error('Missing CSRF token');
-  }
 
   const res = await fetch(signInUrlWithParams, {
     method: 'post',
@@ -90,7 +87,7 @@ export async function signIn<P extends string | undefined = undefined>(
   const data = await res.clone().json();
   const error = data.url ? new URL(data.url).searchParams.get('error') : null;
 
-  if (redirect || !isSupportingReturn || !error) {
+  if (redirect !== false || !isSupportingReturn || !error) {
     window.location.assign(data.url ?? callbackUrl);
 
     if (data.url && data.url.includes('#')) {
@@ -116,9 +113,6 @@ export async function signOut(options?: AstroSignOutParams): Promise<void> {
   }
 
   const csrfToken: string = await __getCsrfToken(prefix);
-  if (!csrfToken) {
-    throw new Error('Missing CSRF token');
-  }
 
   const res = await fetch(`${prefix}/signout`, {
     method: 'post',
