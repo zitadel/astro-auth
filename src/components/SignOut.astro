@@ -42,12 +42,16 @@ attrs.class = `signout-button ${attrs.class ?? ''}`;
     if (button instanceof HTMLElement && !button.dataset.signoutInitialized) {
       button.dataset.signoutInitialized = 'true';
 
-      button.addEventListener('click', () => {
-        const params = button.dataset.signoutParams
-          ? JSON.parse(button.dataset.signoutParams)
-          : undefined;
+      button.addEventListener('click', async () => {
+        try {
+          const params = button.dataset.signoutParams
+            ? JSON.parse(button.dataset.signoutParams)
+            : undefined;
 
-        signOut(params);
+          await signOut(params);
+        } catch (error) {
+          console.error('Sign out failed:', error);
+        }
       });
     }
   }

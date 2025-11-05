@@ -60,42 +60,46 @@ attrs.class = `signin-button ${attrs.class ?? ''}`;
 <script>
   import { signIn } from '../client';
 
-  function initializeSignInButton(button: Element) {
-    if (button instanceof HTMLElement && !button.dataset.signinInitialized) {
-      button.dataset.signinInitialized = 'true';
+    function initializeSignInButton(button: Element) {
+      if (button instanceof HTMLElement && !button.dataset.signinInitialized) {
+        button.dataset.signinInitialized = 'true';
 
-      button.addEventListener('click', () => {
-        const provider = button.dataset.signinProvider;
-        const options = button.dataset.signinOptions
-          ? JSON.parse(button.dataset.signinOptions)
-          : undefined;
-        const authParams = button.dataset.signinAuthParams
-          ? JSON.parse(button.dataset.signinAuthParams)
-          : undefined;
+        button.addEventListener('click', async () => {
+          try {
+            const provider = button.dataset.signinProvider;
+            const options = button.dataset.signinOptions
+              ? JSON.parse(button.dataset.signinOptions)
+              : undefined;
+            const authParams = button.dataset.signinAuthParams
+              ? JSON.parse(button.dataset.signinAuthParams)
+              : undefined;
 
-        signIn(provider, options, authParams);
-      });
-    }
-  }
-
-  document
-    .querySelectorAll('[data-signin-key]')
-    .forEach(initializeSignInButton);
-
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      mutation.addedNodes.forEach((node) => {
-        if (node instanceof HTMLElement) {
-          if (node.hasAttribute('data-signin-key')) {
-            initializeSignInButton(node);
-          }
-          node
-            .querySelectorAll('[data-signin-key]')
-            .forEach(initializeSignInButton);
+            await signIn(provider, options, authParams);
+            } catch (error) {
+            console.error('Sign in failed:', error);
+            }
+          });
         }
-      });
-    });
-  });
+      }
 
-  observer.observe(document.body, { childList: true, subtree: true });
+    document
+      .querySelectorAll('[data-signin-key]')
+      .forEach(initializeSignInButton);
+
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node instanceof HTMLElement) {
+            if (node.hasAttribute('data-signin-key')) {
+              initializeSignInButton(node);
+              }
+            node
+              .querySelectorAll('[data-signin-key]')
+              .forEach(initializeSignInButton);
+            }
+          });
+        });
+      });
+
+    observer.observe(document.body, { childList: true, subtree: true });
 </script>
