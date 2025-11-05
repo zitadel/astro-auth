@@ -26,7 +26,8 @@
 import { Auth, createActionURL, setEnvDefaults } from '@auth/core';
 import type { APIContext } from 'astro';
 import authConfig from 'auth:config';
-import type { AstroAuthConfig, GetSessionResult } from './types';
+import type { AstroAuthConfig } from './types';
+import type { Session } from '@auth/core/types';
 
 function AstroAuthHandler(prefix: string, options = authConfig) {
   return async ({ request }: APIContext) => {
@@ -93,7 +94,7 @@ export function AstroAuth(options = authConfig) {
 export async function getSession(
   req: Request,
   config: AstroAuthConfig,
-): GetSessionResult {
+): Promise<Session | null> {
   setEnvDefaults(process.env, config);
 
   const url = createActionURL(

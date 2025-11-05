@@ -1,4 +1,4 @@
-import type { AuthConfig, Session } from '@auth/core/types';
+import type { AuthConfig } from '@auth/core/types';
 
 /**
  * Re-exported provider types from Auth.js core.
@@ -77,10 +77,3 @@ export interface AstroSignOutParams extends SignOutParams {
  * @public
  */
 export type AstroAuthConfig = Omit<AuthConfig, 'raw'>;
-
-/**
- * Return type for getSession function.
- *
- * @public
- */
-export type GetSessionResult = Promise<Session | null>;
