@@ -171,3 +171,10 @@ We currently are waiting for the [PR](https://github.com/nextauthjs/next-auth/pu
 
 # Contribution
 Waiting on the PR to be merged means, we can still add new features to the PR, so, if you miss anything feel free to open a PR or issue in this repo, and we will try to get it added to the official package.
+
+
+
+
+Document how to do module augmentation
+Document Vercel
+Document Cloudflare
