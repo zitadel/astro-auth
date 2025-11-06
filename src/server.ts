@@ -106,7 +106,6 @@ export async function getSession(
   config: AstroAuthConfig,
 ): Promise<Session | null> {
   setEnvDefaults(process.env, config);
-
   const url = createActionURL(
     'session',
     new URL(req.url).protocol.replace(':', ''),
@@ -114,28 +113,49 @@ export async function getSession(
     process.env,
     config,
   );
-
-  // Forward all headers (not just cookie) so Auth.js gets host, x-forwarded-*, etc.
   const headers = new Headers(req.headers);
-
   const response = await Auth(
     new Request(url, {
       headers,
     }),
     config,
   );
-
-  const { status = 200 } = response;
+  const status = response.status ?? 200;
   const data = await response.json();
-
   if (!data || !Object.keys(data).length) {
     return null;
-  } else if (status === 200) {
-    return data;
   } else {
-    // Include status and payload in error for better debugging
-    throw new Error(
-      `[astro-auth] getSession failed: ${status} ${JSON.stringify(data)}`,
-    );
+    const astroGlobal = globalThis as unknown as {
+      Astro?: { response?: { headers?: Headers } };
+    };
+    const target =
+      astroGlobal.Astro && astroGlobal.Astro.response
+        ? astroGlobal.Astro.response.headers
+        : undefined;
+    if (target) {
+      const h = response.headers as unknown as {
+        getSetCookie?: () => string[];
+      };
+      if (h && typeof h.getSetCookie === 'function') {
+        const cookies = h.getSetCookie();
+        if (Array.isArray(cookies)) {
+          for (const c of cookies) {
+            target.append('Set-Cookie', c);
+          }
+        }
+      } else {
+        const single = response.headers.get('set-cookie');
+        if (single) {
+          target.append('Set-Cookie', single);
+        }
+      }
+    }
+    if (status === 200) {
+      return data as Session;
+    } else {
+      throw new Error(
+        `[astro-auth] getSession failed: ${status} ${JSON.stringify(data)}`,
+      );
+    }
   }
 }
