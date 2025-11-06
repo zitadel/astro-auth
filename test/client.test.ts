@@ -28,8 +28,22 @@ interface MockedFetch {
   resetMocks: () => void;
 }
 
-// Cast fetchMock to our typed version
 const typedFetchMock = fetchMock as unknown as MockedFetch;
+
+/**
+ * Interface for tracking form submissions in tests.
+ * Captures form data when submit() is called since JSDOM doesn't implement it.
+ */
+interface FormSubmissionCapture {
+  action: string;
+  method: string;
+  fields: Record<string, string>;
+}
+
+/**
+ * Global storage for captured form submissions during tests.
+ */
+const capturedFormSubmissions: FormSubmissionCapture[] = [];
 
 /**
  * Type-safe access to the internal location implementation.
@@ -67,6 +81,21 @@ let assignSpy: ReturnType<typeof jest.spyOn>;
 let reloadSpy: ReturnType<typeof jest.spyOn>;
 
 beforeEach(() => {
+  capturedFormSubmissions.length = 0;
+  HTMLFormElement.prototype.submit = function (this: HTMLFormElement) {
+    const formData = new FormData(this);
+    const fields: Record<string, string> = {};
+    formData.forEach((value, key) => {
+      fields[key] = value.toString();
+    });
+    capturedFormSubmissions.push({
+      action: this.action,
+      method: this.method,
+      fields,
+    });
+    this.remove();
+  };
+
   typedFetchMock.resetMocks();
   window.history.pushState(null, '', '/current-page');
 
@@ -76,6 +105,9 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  delete HTMLFormElement.prototype.submit;
+  capturedFormSubmissions.length = 0;
+
   jest.restoreAllMocks();
 });
 
@@ -125,74 +157,47 @@ describe('signIn', () => {
       typedFetchMock.mockResponseOnce(
         JSON.stringify({ csrfToken: 'token-123' }),
       );
-      typedFetchMock.mockResponseOnce(
-        JSON.stringify({ url: 'http://localhost/dashboard' }),
-      );
 
       await signIn('github');
 
-      expect(typedFetchMock.mock.calls).toHaveLength(2);
+      expect(typedFetchMock.mock.calls).toHaveLength(1);
       expect(typedFetchMock.mock.calls[0]?.[0]).toBe('/api/auth/csrf');
-      expect(typedFetchMock.mock.calls[1]?.[0]).toBe('/api/auth/signin/github');
 
-      const requestInit = typedFetchMock.mock.calls[1]?.[1];
-      expect(requestInit?.method).toBe('post');
-      expect(requestInit?.headers).toEqual({
-        Accept: 'application/json',
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'X-Auth-Return-Redirect': '1',
-        'X-Requested-With': 'XMLHttpRequest',
-      });
-
-      const bodyString = requestInit?.body?.toString() ?? '';
-      const body = new URLSearchParams(bodyString);
-      expect(body.get('csrfToken')).toBe('token-123');
-      expect(body.get('callbackUrl')).toBe('/current-page');
-
-      expect(assignSpy).toHaveBeenCalledWith('http://localhost/dashboard');
-      expect(reloadSpy).not.toHaveBeenCalled();
+      expect(capturedFormSubmissions).toHaveLength(1);
+      const submission = capturedFormSubmissions[0];
+      expect(submission?.action).toContain('/api/auth/signin/github');
+      expect(submission?.method).toBe('post');
+      expect(submission?.fields.csrfToken).toBe('token-123');
+      expect(submission?.fields.callbackUrl).toBe('/current-page');
     });
 
     it('should use custom prefix for OAuth provider', async () => {
       typedFetchMock.mockResponseOnce(
         JSON.stringify({ csrfToken: 'token-abc' }),
       );
-      typedFetchMock.mockResponseOnce(
-        JSON.stringify({ url: 'http://localhost/dashboard' }),
-      );
 
       await signIn('google', { prefix: '/custom-auth' });
 
       expect(typedFetchMock.mock.calls[0]?.[0]).toBe('/custom-auth/csrf');
-      expect(typedFetchMock.mock.calls[1]?.[0]).toBe(
-        '/custom-auth/signin/google',
-      );
+
+      const submission = capturedFormSubmissions[0];
+      expect(submission?.action).toContain('/custom-auth/signin/google');
     });
 
     it('should use custom callbackUrl', async () => {
       typedFetchMock.mockResponseOnce(
         JSON.stringify({ csrfToken: 'token-abc' }),
       );
-      typedFetchMock.mockResponseOnce(
-        JSON.stringify({ url: 'http://localhost/custom-dash' }),
-      );
 
       await signIn('google', { callbackUrl: '/custom-dash' });
 
-      const bodyString =
-        typedFetchMock.mock.calls[1]?.[1]?.body?.toString() ?? '';
-      const body = new URLSearchParams(bodyString);
-      expect(body.get('callbackUrl')).toBe('/custom-dash');
-
-      expect(assignSpy).toHaveBeenCalledWith('http://localhost/custom-dash');
+      const submission = capturedFormSubmissions[0];
+      expect(submission?.fields.callbackUrl).toBe('/custom-dash');
     });
 
     it('should append authorization params to signin URL', async () => {
       typedFetchMock.mockResponseOnce(
         JSON.stringify({ csrfToken: 'token-auth' }),
-      );
-      typedFetchMock.mockResponseOnce(
-        JSON.stringify({ url: 'http://localhost/dashboard' }),
       );
 
       await signIn('google', undefined, {
@@ -200,18 +205,14 @@ describe('signIn', () => {
         prompt: 'consent',
       });
 
-      const signInUrl = typedFetchMock.mock.calls[1]?.[0];
-      expect(signInUrl).toContain('/api/auth/signin/google?');
-      expect(signInUrl).toContain('login_hint=user%40example.com');
-      expect(signInUrl).toContain('prompt=consent');
+      const submission = capturedFormSubmissions[0];
+      expect(submission?.action).toContain('login_hint=user%40example.com');
+      expect(submission?.action).toContain('prompt=consent');
     });
 
     it('should pass through extra options to request body', async () => {
       typedFetchMock.mockResponseOnce(
         JSON.stringify({ csrfToken: 'token-extra' }),
-      );
-      typedFetchMock.mockResponseOnce(
-        JSON.stringify({ url: 'http://localhost/dashboard' }),
       );
 
       await signIn('github', {
@@ -220,47 +221,8 @@ describe('signIn', () => {
         customOption: 'customValue',
       });
 
-      const bodyString =
-        typedFetchMock.mock.calls[1]?.[1]?.body?.toString() ?? '';
-      const body = new URLSearchParams(bodyString);
-      expect(body.get('customOption')).toBe('customValue');
-    });
-
-    it('should force reload when redirect URL contains hash', async () => {
-      typedFetchMock.mockResponseOnce(
-        JSON.stringify({ csrfToken: 'token-hash' }),
-      );
-      typedFetchMock.mockResponseOnce(
-        JSON.stringify({ url: 'http://localhost/page#section' }),
-      );
-
-      await signIn('github');
-
-      expect(assignSpy).toHaveBeenCalledWith('http://localhost/page#section');
-      expect(reloadSpy).toHaveBeenCalledTimes(1);
-    });
-
-    it('should fallback to callbackUrl when response url is null', async () => {
-      typedFetchMock.mockResponseOnce(
-        JSON.stringify({ csrfToken: 'token-null' }),
-      );
-      typedFetchMock.mockResponseOnce(JSON.stringify({ url: null }));
-
-      await signIn('github');
-
-      expect(assignSpy).toHaveBeenCalledWith('/current-page');
-      expect(reloadSpy).not.toHaveBeenCalled();
-    });
-
-    it('should fallback to callbackUrl when response url is undefined', async () => {
-      typedFetchMock.mockResponseOnce(
-        JSON.stringify({ csrfToken: 'token-undef' }),
-      );
-      typedFetchMock.mockResponseOnce(JSON.stringify({}));
-
-      await signIn('github');
-
-      expect(assignSpy).toHaveBeenCalledWith('/current-page');
+      const submission = capturedFormSubmissions[0];
+      expect(submission?.fields.customOption).toBe('customValue');
     });
   });
 
@@ -332,7 +294,6 @@ describe('signIn', () => {
 
       await signIn('credentials', { redirect: false });
 
-      // Should redirect because there's no error in the URL
       expect(assignSpy).toHaveBeenCalledWith('http://localhost/dashboard');
     });
   });
@@ -382,16 +343,11 @@ describe('signIn', () => {
       typedFetchMock.mockResponseOnce(
         JSON.stringify({ csrfToken: 'token-none' }),
       );
-      typedFetchMock.mockResponseOnce(
-        JSON.stringify({ url: 'http://localhost/signin' }),
-      );
 
       await signIn();
 
-      expect(typedFetchMock.mock.calls[1]?.[0]).toBe(
-        '/api/auth/signin/undefined',
-      );
-      expect(assignSpy).toHaveBeenCalledWith('http://localhost/signin');
+      const submission = capturedFormSubmissions[0];
+      expect(submission?.action).toContain('/api/auth/signin/undefined');
     });
   });
 
@@ -400,55 +356,31 @@ describe('signIn', () => {
       typedFetchMock.mockResponseOnce(
         JSON.stringify({ csrfToken: 'token-true' }),
       );
-      typedFetchMock.mockResponseOnce(
-        JSON.stringify({ url: 'http://localhost/dashboard' }),
-      );
 
       await signIn('github', { redirect: true });
 
-      expect(assignSpy).toHaveBeenCalledWith('http://localhost/dashboard');
+      expect(capturedFormSubmissions).toHaveLength(1);
     });
 
     it('should use window.location.href as default callbackUrl', async () => {
       typedFetchMock.mockResponseOnce(
         JSON.stringify({ csrfToken: 'token-def' }),
       );
-      typedFetchMock.mockResponseOnce(
-        JSON.stringify({ url: 'http://localhost/dashboard' }),
-      );
 
       await signIn('github');
 
-      const bodyString =
-        typedFetchMock.mock.calls[1]?.[1]?.body?.toString() ?? '';
-      const body = new URLSearchParams(bodyString);
-      expect(body.get('callbackUrl')).toBe('/current-page');
-    });
-
-    it('should not reload when URL without hash', async () => {
-      typedFetchMock.mockResponseOnce(
-        JSON.stringify({ csrfToken: 'token-no' }),
-      );
-      typedFetchMock.mockResponseOnce(
-        JSON.stringify({ url: 'http://localhost/dashboard' }),
-      );
-
-      await signIn('github');
-
-      expect(reloadSpy).not.toHaveBeenCalled();
+      const submission = capturedFormSubmissions[0];
+      expect(submission?.fields.callbackUrl).toBe('/current-page');
     });
 
     it('should handle empty options object', async () => {
       typedFetchMock.mockResponseOnce(
         JSON.stringify({ csrfToken: 'token-empty' }),
       );
-      typedFetchMock.mockResponseOnce(
-        JSON.stringify({ url: 'http://localhost/dashboard' }),
-      );
 
       await signIn('github', {});
 
-      expect(assignSpy).toHaveBeenCalledWith('http://localhost/dashboard');
+      expect(capturedFormSubmissions).toHaveLength(1);
     });
   });
 });
