@@ -3,7 +3,7 @@ import type {
   AstroSignOutParams,
   LiteralUnion,
   SignInAuthorizationParams,
-} from './types';
+} from './types.js';
 
 async function __getCsrfToken(prefix: string): Promise<string> {
   const res = await fetch(`${prefix}/csrf`, {

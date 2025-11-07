@@ -70,7 +70,7 @@
  * @public
  */
 
-export { default } from './integration';
-export { defineConfig } from './config';
-export type { FullAuthConfig } from './config';
-export type { AuthEnvVars, AstroIntegrationOptions } from './config';
+export { default } from './integration.js';
+export { defineConfig } from './config.js';
+export type { FullAuthConfig } from './config.js';
+export type { AuthEnvVars, AstroIntegrationOptions } from './config.js';

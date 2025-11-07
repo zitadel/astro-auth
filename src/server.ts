@@ -26,7 +26,7 @@
 import { Auth, createActionURL, setEnvDefaults } from '@auth/core';
 import type { APIContext } from 'astro';
 import authConfig from 'auth:config';
-import type { AstroAuthConfig } from './types';
+import type { AstroAuthConfig } from './types.js';
 import type { Session } from '@auth/core/types';
 
 function AstroAuthHandler(prefix: string, options = authConfig) {

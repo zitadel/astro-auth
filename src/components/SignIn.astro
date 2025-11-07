@@ -4,7 +4,7 @@ import type {
   BuiltInProviders,
   SignInOptions,
   SignInAuthorizationParams,
-} from '../types';
+} from '../types.js';
 
 /**
  * Props for the SignIn component.
@@ -58,7 +58,7 @@ attrs.class = `signin-button ${attrs.class ?? ''}`;
 </button>
 
 <script>
-  import { signIn } from '../client';
+  import { signIn } from '../client.js';
 
   function initializeSignInButton(button: Element) {
     if (button instanceof HTMLElement && !button.dataset.signinInitialized) {

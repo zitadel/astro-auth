@@ -1,6 +1,6 @@
 ---
 import type { HTMLAttributes } from 'astro/types';
-import type { SignOutParams } from '../types';
+import type { SignOutParams } from '../types.js';
 
 /**
  * Props for the SignOut component.
@@ -36,7 +36,7 @@ attrs.class = `signout-button ${attrs.class ?? ''}`;
 </button>
 
 <script>
-  import { signOut } from '../client';
+  import { signOut } from '../client.js';
 
   function initializeSignOutButton(button: Element) {
     if (button instanceof HTMLElement && !button.dataset.signoutInitialized) {

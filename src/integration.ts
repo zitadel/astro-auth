@@ -1,5 +1,5 @@
 import type { AstroIntegration } from 'astro';
-import { type AstroIntegrationOptions, virtualConfigModule } from './config';
+import { type AstroIntegrationOptions, virtualConfigModule } from './config.js';
 import { fileURLToPath } from 'node:url';
 
 /**
