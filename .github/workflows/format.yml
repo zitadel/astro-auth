@@ -15,10 +15,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           cache: 'npm'
           node-version-file: '.nvmrc'
@@ -38,7 +38,7 @@ jobs:
         run: npm run format
 
       - name: Commit and Push Changes
-        uses: stefanzweifel/git-auto-commit-action@v6
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: Apply Prettier formatting
           commit_options: '--no-verify'
