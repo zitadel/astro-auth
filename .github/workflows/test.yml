@@ -68,3 +68,10 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ vars.AWS_REGION }}
           ACCOUNT_ID: ${{ vars.ACCOUNT_ID }}
+
+      - name: Generate coverage report
+        if: always()
+        uses: mridang/action-test-reporter@v3
+        with:
+          results-path: '.out/junit.xml'
+          coverage-path: '.out/lcov.info'
