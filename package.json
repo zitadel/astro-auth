@@ -1,5 +1,5 @@
 {
-  "name": "@mridang/astro-auth",
+  "name": "@zitadel/astro-auth",
   "description": "A comprehensive Auth.js integration for Astro applications with TypeScript support, framework-agnostic HTTP adapters, and role-based access control",
   "version": "1.0.0",
   "type": "module",
@@ -32,15 +32,16 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mridang/astro-auth.git"
+    "url": "git+https://github.com/zitadel/astro-auth.git"
   },
   "author": {
     "name": "Mridang Agarwalla",
-    "email": "mridang.agarwalla@gmail.com",
-    "url": "https://github.com/mridang"
+    "email": "mridang@zitadel.com",
+    "url": "https://github.com/zitadel"
   },
   "scripts": {
     "prepack": "tsc",
+    "prepare": "npm run build",
     "build": "tsup",
     "test": "jest --verbose --config=jest.config.mjs --runInBand",
     "test:watch": "npm run test -- --watch",
@@ -48,7 +49,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "npx eslint .",
-    "lint:fix": "npx eslint . --fix"
+    "lint:fix": "npx eslint . --fix",
+    "depcheck": "npx knip"
   },
   "peerDependencies": {
     "@auth/core": ">=0.40.0",
@@ -100,9 +102,9 @@
     "withastro"
   ],
   "private": false,
-  "homepage": "https://github.com/mridang/astro-auth",
-  "bugs": "https://github.com/mridang/astro-auth/issues",
+  "homepage": "https://github.com/zitadel/astro-auth",
+  "bugs": "https://github.com/zitadel/astro-auth/issues",
   "publishConfig": {
-    "access": "public"
+    "registry": "https://npm.pkg.github.com"
   }
 }
