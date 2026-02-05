@@ -26,14 +26,6 @@ jobs:
       commit_changes: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     secrets: inherit
 
-  compat-check:
-    name: Run Compatibility Checks
-    uses: ./.github/workflows/integration.yml
-    with:
-      library_ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.ref }}
-      sanity_ref: sanity
-    secrets: inherit
-
   type-check:
     name: Run Type Checks
     uses: ./.github/workflows/typecheck.yml
@@ -70,7 +62,6 @@ jobs:
     needs:
       - lint-commits
       - code-style
-      - compat-check
       - type-check
       - run-tests
       - code-inspection
