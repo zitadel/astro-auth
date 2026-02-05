@@ -20,7 +20,7 @@
  * ```
  *
  * ```bash npm2yarn2pnpm
- * npm install @auth/core @auth/astro
+ * npm install @auth/core @zitadel/astro-auth
  * ```
  */
 import { Auth, createActionURL, setEnvDefaults } from '@auth/core';

@@ -1,6 +1,6 @@
 // noinspection JSUnusedGlobalSymbols
 export default {
-  branches: ['master'],
+  branches: ['main'],
   plugins: [
     '@semantic-release/commit-analyzer',
     '@semantic-release/release-notes-generator',
@@ -28,5 +28,5 @@ export default {
       },
     ],
   ],
-  repositoryUrl: 'git+https://github.com/mridang/astro-auth.git',
+  repositoryUrl: 'git+https://github.com/zitadel/astro-auth.git',
 };

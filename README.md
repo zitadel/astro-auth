@@ -32,7 +32,7 @@ of applications or deployment scenarios might warrant different approaches:
   beyond simple authentication. This calls for cohesive building blocks: server utilities,
   client helpers, and drop-in UI components.
 
-This integration, `@mridang/astro-auth`, aims to provide the flexibility to
+This integration, `@zitadel/astro-auth`, aims to provide the flexibility to
 handle such scenarios. It allows you to leverage the full Auth.js ecosystem
 while maintaining Astro best practices, ultimately leading to a more
 effective and less burdensome authentication implementation.
@@ -42,12 +42,12 @@ effective and less burdensome authentication implementation.
 Install using NPM by using the following command:
 
 ```sh
-npm install @mridang/astro-auth @auth/core
+npm install @zitadel/astro-auth @auth/core
 ```
 
 ## Usage
 
-To use this integration, add the `@mridang/astro-auth` integration to your Astro application.
+To use this integration, add the `@zitadel/astro-auth` integration to your Astro application.
 The integration provides authentication infrastructure with configurable
 endpoints, SSR utilities, and components.
 
@@ -60,7 +60,7 @@ First, add the integration to your Astro config:
 ```ts
 // astro.config.mjs
 import { defineConfig } from 'astro/config';
-import authAstro from '@mridang/astro-auth';
+import authAstro from '@zitadel/astro-auth';
 
 export default defineConfig({
   output: 'server',
@@ -76,7 +76,7 @@ export default defineConfig({
 
 ```ts
 // auth.config.ts
-import { defineConfig } from '@mridang/astro-auth';
+import { defineConfig } from '@zitadel/astro-auth';
 import Google from '@auth/core/providers/google';
 
 export default defineConfig({
@@ -110,7 +110,7 @@ authentication:
 ```astro
 ---
 // src/pages/index.astro
-import { getSession } from '@mridang/astro-auth/server';
+import { getSession } from '@zitadel/astro-auth/server';
 import type { Session } from '@auth/core/types';
 
 const session = await getSession(Astro.request);
@@ -136,7 +136,7 @@ Prefer using components? Use the built-ins for a richer experience:
 ---
 // src/pages/index.astro
 import type { Session } from '@auth/core/types';
-import { Auth, SignIn, SignOut } from '@mridang/astro-auth/components';
+import { Auth, SignIn, SignOut } from '@zitadel/astro-auth/components';
 ---
 
 <Auth>
@@ -167,7 +167,7 @@ Prefer client helpers? Use inline script tags:
     <button id="logout">Logout</button>
 
     <script>
-      const { signIn, signOut } = await import("@mridang/astro-auth/client");
+      const { signIn, signOut } = await import("@zitadel/astro-auth/client");
       document.querySelector("#login").onclick = () => signIn("github");
       document.querySelector("#logout").onclick = () => signOut();
     </script>
@@ -182,7 +182,7 @@ providers and custom session configuration:
 
 ```ts
 // auth.config.ts
-import { defineConfig } from '@mridang/astro-auth';
+import { defineConfig } from '@zitadel/astro-auth';
 import Google from '@auth/core/providers/google';
 import GitHub from '@auth/core/providers/github';
 

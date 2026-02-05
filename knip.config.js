@@ -5,5 +5,5 @@ module.exports = {
     'jest-environment-jsdom',
   ],
   entry: ['src/api/**/*.ts'],
-  ignore: ['src/components/index.d.ts'],
+  ignore: ['src/components/index.d.ts', 'typedoc.config.mjs'],
 };
