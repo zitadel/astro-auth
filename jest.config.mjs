@@ -24,24 +24,23 @@ export default {
   testPathIgnorePatterns: ['/node_modules/', '/frontend/', '/dist/'],
   resetModules: false,
   collectCoverage: true,
-  coverageDirectory: './.out',
+  coverageDirectory: './build/coverage',
   collectCoverageFrom: ['src/**/*.{ts,tsx,js,jsx}', '!src/**/*.d.ts'],
-  coverageReporters: ['lcov', 'text'],
-  reporters: [
-    'default',
-    [
-      'jest-junit',
-      {
-        outputDirectory: './.out',
-        outputName: 'junit.xml',
-      },
-    ],
-  ],
+  coverageReporters: ['clover', 'cobertura', 'lcov'],
   coveragePathIgnorePatterns: ['/dist/', '/node_modules/'],
   testTimeout: 60000,
   extensionsToTreatAsEsm: ['.ts', '.tsx', '.mts'],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
-    '^auth:config$': '<rootDir>/test/__mocks__/auth-config.ts',
   },
+  reporters: [
+    'default',
+    [
+      'jest-junit',
+      {
+        outputDirectory: './build/reports',
+        outputName: 'junit.xml',
+      },
+    ],
+  ],
 };
