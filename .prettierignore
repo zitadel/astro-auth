@@ -1,8 +1,6 @@
 node_modules
 .github
-.changeset
 *.md
-yarn.yaml
-.turbo
-.vercel
-.vscode
+dist
+build
+qodana.yaml

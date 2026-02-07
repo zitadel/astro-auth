@@ -1,7 +1,20 @@
 import { describe, expect, it } from '@jest/globals';
-import type { Plugin } from 'vite';
-import { defineConfig, virtualConfigModule } from '../src/config';
-import type { PluginContext } from 'rollup';
+import { defineConfig, virtualConfigModule } from '../src/config.js';
+
+// Define a minimal mock context for testing the plugin's load function
+interface MockPluginContext {
+  resolve: (source: string) => Promise<{ id: string }>;
+}
+
+// Define a concrete Plugin interface for testing
+interface TestPlugin {
+  name: string;
+  resolveId?: (id: string) => string | undefined;
+  load?: (
+    this: MockPluginContext,
+    id: string,
+  ) => Promise<string | undefined> | string | undefined;
+}
 
 describe('Config Module', () => {
   describe('defineConfig', () => {
@@ -144,7 +157,7 @@ describe('Config Module', () => {
 
   describe('virtualConfigModule', () => {
     it('should return Vite plugin object with correct structure', () => {
-      const plugin = virtualConfigModule() as Plugin;
+      const plugin = virtualConfigModule() as TestPlugin;
 
       expect(plugin).toHaveProperty('name');
       expect(plugin).toHaveProperty('resolveId');
@@ -153,9 +166,9 @@ describe('Config Module', () => {
     });
 
     it('should use default config file path when not provided', async () => {
-      const plugin = virtualConfigModule() as Plugin;
+      const plugin = virtualConfigModule() as TestPlugin;
       const loadFn = plugin.load as (
-        this: PluginContext,
+        this: MockPluginContext,
         id: string,
       ) => Promise<string | undefined>;
 
@@ -168,9 +181,9 @@ describe('Config Module', () => {
     });
 
     it('should use custom config file path when provided', async () => {
-      const plugin = virtualConfigModule('./custom/auth.ts') as Plugin;
+      const plugin = virtualConfigModule('./custom/auth.ts') as TestPlugin;
       const loadFn = plugin.load as (
-        this: PluginContext,
+        this: MockPluginContext,
         id: string,
       ) => Promise<string | undefined>;
 
@@ -183,7 +196,7 @@ describe('Config Module', () => {
     });
 
     it('should resolve virtual module ID correctly', () => {
-      const plugin = virtualConfigModule() as Plugin;
+      const plugin = virtualConfigModule() as TestPlugin;
       const resolveIdFn = plugin.resolveId as (
         id: string,
       ) => string | undefined;
@@ -194,7 +207,7 @@ describe('Config Module', () => {
     });
 
     it('should not resolve non-virtual module IDs', () => {
-      const plugin = virtualConfigModule() as Plugin;
+      const plugin = virtualConfigModule() as TestPlugin;
       const resolveIdFn = plugin.resolveId as (
         id: string,
       ) => string | undefined;
@@ -205,9 +218,9 @@ describe('Config Module', () => {
     });
 
     it('should return import statement for virtual module', async () => {
-      const plugin = virtualConfigModule('./my-auth.config') as Plugin;
+      const plugin = virtualConfigModule('./my-auth.config') as TestPlugin;
       const loadFn = plugin.load as (
-        this: PluginContext,
+        this: MockPluginContext,
         id: string,
       ) => Promise<string | undefined>;
 
@@ -222,9 +235,9 @@ describe('Config Module', () => {
     });
 
     it('should not load non-virtual module IDs', async () => {
-      const plugin = virtualConfigModule() as Plugin;
+      const plugin = virtualConfigModule() as TestPlugin;
       const loadFn = plugin.load as (
-        this: PluginContext,
+        this: MockPluginContext,
         id: string,
       ) => Promise<string | undefined>;
 

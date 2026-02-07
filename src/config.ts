@@ -1,6 +1,8 @@
-import type { PluginOption } from 'vite';
 import type { AuthConfig } from '@auth/core/types';
 import type { PluginContext } from 'rollup';
+import type { ViteUserConfig } from 'astro';
+
+type PluginOption = NonNullable<ViteUserConfig['plugins']>[number];
 
 /**
  * Configuration options specific to the Astro integration.

@@ -6,9 +6,7 @@
     "allowImportingTsExtensions": false,
     "noEmit": false,
     "declaration": true,
-    "declarationMap": true,
     "outDir": "./dist",
-    "rootDir": "./src",
     "paths": {
       "auth:config": ["./src/module.d.ts"]
     }

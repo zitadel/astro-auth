@@ -1,4 +1,4 @@
-export default {
+const baseConfig = {
   preset: 'ts-jest/presets/default-esm',
   transform: {
     '^.+\\.m?[tj]sx?$': [
@@ -9,8 +9,6 @@ export default {
       },
     ],
   },
-  testEnvironment: 'node',
-  testMatch: ['**/*.+(spec|test).[tj]s?(x)'],
   moduleFileExtensions: [
     'ts',
     'tsx',
@@ -23,16 +21,40 @@ export default {
   ],
   testPathIgnorePatterns: ['/node_modules/', '/frontend/', '/dist/'],
   resetModules: false,
+  testTimeout: 60000,
+  extensionsToTreatAsEsm: ['.ts', '.tsx', '.mts'],
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+    '^auth:config$': '<rootDir>/test/__mocks__/auth-config.ts',
+  },
+};
+
+export default {
+  projects: [
+    {
+      ...baseConfig,
+      displayName: 'node',
+      testEnvironment: 'node',
+      testMatch: ['<rootDir>/test/**/*.test.ts'],
+      testPathIgnorePatterns: [
+        '/node_modules/',
+        '/frontend/',
+        '/dist/',
+        '<rootDir>/test/client.test.ts',
+      ],
+    },
+    {
+      ...baseConfig,
+      displayName: 'jsdom',
+      testEnvironment: 'jsdom',
+      testMatch: ['<rootDir>/test/client.test.ts'],
+    },
+  ],
   collectCoverage: true,
   coverageDirectory: './build/coverage',
   collectCoverageFrom: ['src/**/*.{ts,tsx,js,jsx}', '!src/**/*.d.ts'],
   coverageReporters: ['clover', 'cobertura', 'lcov'],
   coveragePathIgnorePatterns: ['/dist/', '/node_modules/'],
-  testTimeout: 60000,
-  extensionsToTreatAsEsm: ['.ts', '.tsx', '.mts'],
-  moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1',
-  },
   reporters: [
     'default',
     [

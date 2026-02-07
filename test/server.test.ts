@@ -54,14 +54,14 @@ describe('server', () => {
 
   describe('AstroAuth handlers', () => {
     it('exposes GET and POST', async () => {
-      const { AstroAuth } = await import('../src/server');
+      const { AstroAuth } = await import('../src/server.js');
       const mod = AstroAuth({ providers: [] });
       expect(typeof mod.GET).toBe('function');
       expect(typeof mod.POST).toBe('function');
     });
 
     it('GET /providers with basePath returns JSON', async () => {
-      const { AstroAuth } = await import('../src/server');
+      const { AstroAuth } = await import('../src/server.js');
       const { GET } = AstroAuth({ ...makeCfg() });
       const ctx = {
         request: new Request('http://x.local/api/auth/providers'),
@@ -73,7 +73,7 @@ describe('server', () => {
     });
 
     it('GET outside basePath returns undefined', async () => {
-      const { AstroAuth } = await import('../src/server');
+      const { AstroAuth } = await import('../src/server.js');
       const { GET } = AstroAuth({ ...makeCfg() });
       const ctx = {
         request: new Request('http://x.local/not-auth/providers'),
@@ -83,7 +83,7 @@ describe('server', () => {
     });
 
     it('GET with configured provider lists it', async () => {
-      const { AstroAuth } = await import('../src/server');
+      const { AstroAuth } = await import('../src/server.js');
       const { GET } = AstroAuth({
         ...makeCfg(),
         providers: [GitHub({ clientId: 'a', clientSecret: 'b' })],
@@ -106,7 +106,7 @@ describe('server', () => {
         createActionURL: jest.fn().mockImplementation(mockCreateActionURL),
         setEnvDefaults: jest.fn(),
       }));
-      const { AstroAuth } = await import('../src/server');
+      const { AstroAuth } = await import('../src/server.js');
       const { POST } = AstroAuth({ ...makeCfg() });
       const form = new URLSearchParams({ a: '1' });
       const ctx = {
@@ -129,7 +129,7 @@ describe('server', () => {
         createActionURL: jest.fn().mockImplementation(mockCreateActionURL),
         setEnvDefaults: jest.fn(),
       }));
-      const { getSession } = await import('../src/server');
+      const { getSession } = await import('../src/server.js');
       const ses = await getSession(new Request('http://x.local/'), makeCfg());
       expect(ses).toBeNull();
     });
@@ -147,7 +147,7 @@ describe('server', () => {
         createActionURL: jest.fn().mockImplementation(mockCreateActionURL),
         setEnvDefaults: jest.fn(),
       }));
-      const { getSession } = await import('../src/server');
+      const { getSession } = await import('../src/server.js');
       const ses = await getSession(new Request('http://x.local/'), makeCfg());
       expect(ses).not.toBeNull();
       expect(ses?.user?.name).toBe('T');
@@ -161,7 +161,7 @@ describe('server', () => {
         createActionURL: jest.fn().mockImplementation(mockCreateActionURL),
         setEnvDefaults: jest.fn(),
       }));
-      const { getSession } = await import('../src/server');
+      const { getSession } = await import('../src/server.js');
       await expect(
         getSession(new Request('http://x.local/'), makeCfg()),
       ).rejects.toThrow(
@@ -170,21 +170,23 @@ describe('server', () => {
     });
 
     it('forwards incoming cookies to Auth', async () => {
-      const spy = jest.fn().mockImplementation((r: Request) => {
-        expect(r.headers.get('cookie')).toContain(
-          'authjs.session-token=session123',
-        );
-        return makeAuthResponse(
-          { user: { name: 'C' }, expires: '2099-01-01T00:00:00.000Z' },
-          200,
-        );
-      });
+      const spy = jest
+        .fn<(r: Request) => Response>()
+        .mockImplementation((r) => {
+          expect(r.headers.get('cookie')).toContain(
+            'authjs.session-token=session123',
+          );
+          return makeAuthResponse(
+            { user: { name: 'C' }, expires: '2099-01-01T00:00:00.000Z' },
+            200,
+          );
+        });
       jest.unstable_mockModule('@auth/core', () => ({
         Auth: spy,
         createActionURL: jest.fn().mockImplementation(mockCreateActionURL),
         setEnvDefaults: jest.fn(),
       }));
-      const { getSession } = await import('../src/server');
+      const { getSession } = await import('../src/server.js');
       const req = new Request('http://x.local/', {
         headers: { cookie: 'authjs.session-token=session123; other=x' },
       });
@@ -194,39 +196,43 @@ describe('server', () => {
     });
 
     it('omits cookie header when none are present', async () => {
-      const spy = jest.fn().mockImplementation((r: Request) => {
-        expect(r.headers.has('cookie')).toBe(false);
-        return makeAuthResponse(
-          { user: { id: 'n' }, expires: '2099-01-01T00:00:00.000Z' },
-          200,
-        );
-      });
+      const spy = jest
+        .fn<(r: Request) => Response>()
+        .mockImplementation((r) => {
+          expect(r.headers.has('cookie')).toBe(false);
+          return makeAuthResponse(
+            { user: { id: 'n' }, expires: '2099-01-01T00:00:00.000Z' },
+            200,
+          );
+        });
       jest.unstable_mockModule('@auth/core', () => ({
         Auth: spy,
         createActionURL: jest.fn().mockImplementation(mockCreateActionURL),
         setEnvDefaults: jest.fn(),
       }));
-      const { getSession } = await import('../src/server');
+      const { getSession } = await import('../src/server.js');
       const ses = await getSession(new Request('http://x.local/'), makeCfg());
       expect(ses?.user?.id).toBe('n');
       expect(spy).toHaveBeenCalledTimes(1);
     });
 
     it('accepts __Secure-authjs.session-token cookie', async () => {
-      const spy = jest.fn().mockImplementation((r: Request) => {
-        const c = r.headers.get('cookie') || '';
-        expect(c).toMatch(/__Secure-authjs\.session-token=secure123/);
-        return makeAuthResponse(
-          { user: { id: 'u' }, expires: '2099-01-01T00:00:00.000Z' },
-          200,
-        );
-      });
+      const spy = jest
+        .fn<(r: Request) => Response>()
+        .mockImplementation((r) => {
+          const c = r.headers.get('cookie') || '';
+          expect(c).toMatch(/__Secure-authjs\.session-token=secure123/);
+          return makeAuthResponse(
+            { user: { id: 'u' }, expires: '2099-01-01T00:00:00.000Z' },
+            200,
+          );
+        });
       jest.unstable_mockModule('@auth/core', () => ({
         Auth: spy,
         createActionURL: jest.fn().mockImplementation(mockCreateActionURL),
         setEnvDefaults: jest.fn(),
       }));
-      const { getSession } = await import('../src/server');
+      const { getSession } = await import('../src/server.js');
       const req = new Request('http://x.local/', {
         headers: { cookie: '__Secure-authjs.session-token=secure123' },
       });
@@ -236,20 +242,22 @@ describe('server', () => {
     });
 
     it('passes hashed cookie variant authjs.session-token.<hash>', async () => {
-      const spy = jest.fn().mockImplementation((r: Request) => {
-        const c = r.headers.get('cookie') || '';
-        expect(c).toContain('authjs.session-token.hash_abc=valxyz');
-        return makeAuthResponse(
-          { user: { email: 'e' }, expires: '2099-01-01T00:00:00.000Z' },
-          200,
-        );
-      });
+      const spy = jest
+        .fn<(r: Request) => Response>()
+        .mockImplementation((r) => {
+          const c = r.headers.get('cookie') || '';
+          expect(c).toContain('authjs.session-token.hash_abc=valxyz');
+          return makeAuthResponse(
+            { user: { email: 'e' }, expires: '2099-01-01T00:00:00.000Z' },
+            200,
+          );
+        });
       jest.unstable_mockModule('@auth/core', () => ({
         Auth: spy,
         createActionURL: jest.fn().mockImplementation(mockCreateActionURL),
         setEnvDefaults: jest.fn(),
       }));
-      const { getSession } = await import('../src/server');
+      const { getSession } = await import('../src/server.js');
       const req = new Request('http://x.local/', {
         headers: { cookie: 'authjs.session-token.hash_abc=valxyz' },
       });
@@ -279,7 +287,7 @@ describe('server', () => {
       (globalThis as { Astro: { response: { headers: Headers } } }).Astro = {
         response: { headers: new Headers() },
       };
-      const { getSession } = await import('../src/server');
+      const { getSession } = await import('../src/server.js');
       const ses = await getSession(
         new Request('http://x.local/', {
           headers: { cookie: 'authjs.session-token=old' },
@@ -316,7 +324,7 @@ describe('server', () => {
       (globalThis as { Astro: { response: { headers: Headers } } }).Astro = {
         response: { headers: new Headers() },
       };
-      const { getSession } = await import('../src/server');
+      const { getSession } = await import('../src/server.js');
       const ses = await getSession(new Request('http://x.local/'), makeCfg());
       expect(ses?.user?.id).toBe('s');
       const h = globalThis.Astro.response.headers as ExtHeaders;
@@ -329,22 +337,24 @@ describe('server', () => {
     });
 
     it('forwards host and x-forwarded headers to Auth', async () => {
-      const spy = jest.fn().mockImplementation((r: Request) => {
-        expect(r.headers.get('host')).toBe('example.com');
-        expect(r.headers.get('x-forwarded-proto')).toBe('https');
-        expect(r.headers.get('x-forwarded-host')).toBe('example.com');
-        expect(r.headers.get('x-forwarded-port')).toBe('443');
-        return makeAuthResponse(
-          { user: { name: 'H' }, expires: '2099-01-01T00:00:00.000Z' },
-          200,
-        );
-      });
+      const spy = jest
+        .fn<(r: Request) => Response>()
+        .mockImplementation((r) => {
+          expect(r.headers.get('host')).toBe('example.com');
+          expect(r.headers.get('x-forwarded-proto')).toBe('https');
+          expect(r.headers.get('x-forwarded-host')).toBe('example.com');
+          expect(r.headers.get('x-forwarded-port')).toBe('443');
+          return makeAuthResponse(
+            { user: { name: 'H' }, expires: '2099-01-01T00:00:00.000Z' },
+            200,
+          );
+        });
       jest.unstable_mockModule('@auth/core', () => ({
         Auth: spy,
         createActionURL: jest.fn().mockImplementation(mockCreateActionURL),
         setEnvDefaults: jest.fn(),
       }));
-      const { getSession } = await import('../src/server');
+      const { getSession } = await import('../src/server.js');
       const req = new Request('https://example.com/profile', {
         headers: {
           host: 'example.com',

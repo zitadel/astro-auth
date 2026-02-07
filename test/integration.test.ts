@@ -5,7 +5,7 @@ import type {
   InjectedRoute,
   AstroIntegrationLogger,
 } from 'astro';
-import authIntegration from '../src/integration';
+import authIntegration from '../src/integration.js';
 
 function createMockAdapter(name: string = '@astrojs/node') {
   return {
@@ -86,8 +86,8 @@ async function runIntegrationSetup(
     injectRoute: (route: InjectedRoute) => {
       injectedRoutes.push(route);
     },
-    updateConfig: (newConfig: AstroConfig) => {
-      viteConfigs.push(newConfig);
+    updateConfig: (newConfig: unknown) => {
+      viteConfigs.push(newConfig as AstroConfig);
       Object.assign(config, newConfig);
       return config;
     },
@@ -542,7 +542,7 @@ describe('Integration Module', () => {
         injectRoute: () => {
           callOrder.push('injectRoute');
         },
-        updateConfig: (newConfig: AstroConfig) => {
+        updateConfig: (newConfig: unknown) => {
           callOrder.push('updateConfig');
           Object.assign(config, newConfig);
           return config;

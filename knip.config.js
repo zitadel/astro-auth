@@ -1,9 +1,5 @@
 module.exports = {
-  ignoreDependencies: [
-    '@semantic-release/.*?',
-    'auth',
-    'jest-environment-jsdom',
-  ],
+  ignoreDependencies: ['@semantic-release/.*?', 'auth'],
   entry: ['src/api/**/*.ts'],
   ignore: ['src/components/index.d.ts', 'typedoc.config.mjs'],
 };

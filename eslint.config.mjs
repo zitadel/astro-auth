@@ -1,27 +1,26 @@
 import mridang from '@mridang/eslint-defaults';
 import eslintPluginAstro from 'eslint-plugin-astro';
-import tsParser from '@typescript-eslint/parser';
 
 export default [
   {
-    ignores: ['README.md', 'README.md/**', 'src/components/index.d.ts'],
+    ignores: [
+      'README.md',
+      'README.md/**',
+      'src/components/index.d.ts',
+      '.vscode/**',
+      '.claude/**',
+      'dist/**',
+      'build/**',
+      '.out/**',
+    ],
   },
   ...mridang.configs.recommended,
-  ...eslintPluginAstro.configs.recommended,
+  ...eslintPluginAstro.configs['flat/recommended'],
+  // Override eslint-plugin-astro's project: null setting to enable type-aware
+  // linting for TypeScript extracted from Astro component scripts
   {
-    files: ['**/*.astro'],
+    files: ['**/*.astro/*.ts'],
     languageOptions: {
-      parserOptions: {
-        parser: '@typescript-eslint/parser',
-        project: null,
-        extraFileExtensions: ['.astro'],
-      },
-    },
-  },
-  {
-    files: ['**/*.astro/*.ts', '*.astro/*.ts'],
-    languageOptions: {
-      parser: tsParser,
       parserOptions: {
         project: './tsconfig.json',
       },

@@ -3,21 +3,21 @@ import { describe, expect, it } from '@jest/globals';
 describe('Package Exports', () => {
   describe('Main Entry Point', () => {
     it('should export default integration function', async () => {
-      const module = await import('../src/index');
+      const module = await import('../src/index.js');
 
       expect(module.default).toBeDefined();
       expect(typeof module.default).toBe('function');
     });
 
     it('should export defineConfig function', async () => {
-      const { defineConfig } = await import('../src/index');
+      const { defineConfig } = await import('../src/index.js');
 
       expect(defineConfig).toBeDefined();
       expect(typeof defineConfig).toBe('function');
     });
 
     it('should not export components from main entry', async () => {
-      const module = await import('../src/index');
+      const module = await import('../src/index.js');
 
       expect(module).not.toHaveProperty('Auth');
       expect(module).not.toHaveProperty('SignIn');
@@ -27,14 +27,14 @@ describe('Package Exports', () => {
 
   describe('Client Entry Point', () => {
     it('should export signIn function', async () => {
-      const { signIn } = await import('../src/client');
+      const { signIn } = await import('../src/client.js');
 
       expect(signIn).toBeDefined();
       expect(typeof signIn).toBe('function');
     });
 
     it('should export signOut function', async () => {
-      const { signOut } = await import('../src/client');
+      const { signOut } = await import('../src/client.js');
 
       expect(signOut).toBeDefined();
       expect(typeof signOut).toBe('function');
@@ -43,14 +43,14 @@ describe('Package Exports', () => {
 
   describe('Server Entry Point', () => {
     it('should export AstroAuth function', async () => {
-      const { AstroAuth } = await import('../src/server');
+      const { AstroAuth } = await import('../src/server.js');
 
       expect(AstroAuth).toBeDefined();
       expect(typeof AstroAuth).toBe('function');
     });
 
     it('should export getSession function', async () => {
-      const { getSession } = await import('../src/server');
+      const { getSession } = await import('../src/server.js');
 
       expect(getSession).toBeDefined();
       expect(typeof getSession).toBe('function');
@@ -59,7 +59,7 @@ describe('Package Exports', () => {
 
   describe('Types Entry Point', () => {
     it('should have all type exports available', async () => {
-      const types = await import('../src/types');
+      const types = await import('../src/types.js');
 
       expect(types).toBeDefined();
     });
@@ -67,14 +67,14 @@ describe('Package Exports', () => {
 
   describe('Config Entry Point', () => {
     it('should export defineConfig function', async () => {
-      const { defineConfig } = await import('../src/config');
+      const { defineConfig } = await import('../src/config.js');
 
       expect(defineConfig).toBeDefined();
       expect(typeof defineConfig).toBe('function');
     });
 
     it('should export virtualConfigModule function', async () => {
-      const { virtualConfigModule } = await import('../src/config');
+      const { virtualConfigModule } = await import('../src/config.js');
 
       expect(virtualConfigModule).toBeDefined();
       expect(typeof virtualConfigModule).toBe('function');
@@ -83,14 +83,14 @@ describe('Package Exports', () => {
 
   describe('Integration Entry Point', () => {
     it('should export default integration function', async () => {
-      const integration = await import('../src/integration');
+      const integration = await import('../src/integration.js');
 
       expect(integration.default).toBeDefined();
       expect(typeof integration.default).toBe('function');
     });
 
     it('should return AstroIntegration object', async () => {
-      const integration = await import('../src/integration');
+      const integration = await import('../src/integration.js');
       const result = integration.default();
 
       expect(result).toHaveProperty('name');

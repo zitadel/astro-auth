@@ -1,5 +1,3 @@
-/** @jest-environment jsdom */
-
 import {
   describe,
   expect,
@@ -10,9 +8,9 @@ import {
 } from '@jest/globals';
 
 import fetchMock from 'jest-fetch-mock';
-fetchMock.enableMocks();
+(fetchMock as unknown as { enableMocks: () => void }).enableMocks();
 
-import { signIn, signOut } from '../src/client';
+import { signIn, signOut } from '../src/client.js';
 
 /**
  * Type definition for jest-fetch-mock's FetchMock.
@@ -66,7 +64,7 @@ function getLocationImpl(): LocationImpl {
     throw new Error('Could not find location implementation symbol');
   }
 
-  const impl = (window.location as unknown as Record<symbol, unknown>)[
+  const impl = (window.location as unknown as Record<symbol | string, unknown>)[
     implSymbol
   ];
 
@@ -105,7 +103,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  delete HTMLFormElement.prototype.submit;
+  delete (HTMLFormElement.prototype as { submit?: () => void }).submit;
   capturedFormSubmissions.length = 0;
 
   jest.restoreAllMocks();

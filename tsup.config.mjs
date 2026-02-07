@@ -1,12 +1,10 @@
 import { defineConfig } from 'tsup';
 import { promises as fs } from 'node:fs';
-import type { Dirent } from 'node:fs';
 import path from 'node:path';
-import type { Plugin } from 'esbuild';
 
-async function copyAstroOnly(src: string, dest: string): Promise<void> {
+async function copyAstroOnly(src, dest) {
   await fs.mkdir(dest, { recursive: true });
-  const entries: Dirent[] = await fs.readdir(src, { withFileTypes: true });
+  const entries = await fs.readdir(src, { withFileTypes: true });
   for (const entry of entries) {
     const srcPath = path.join(src, entry.name);
     const destPath = path.join(dest, entry.name);
@@ -18,7 +16,7 @@ async function copyAstroOnly(src: string, dest: string): Promise<void> {
   }
 }
 
-const astroExternal: Plugin = {
+const astroExternal = {
   name: 'astro-external',
   setup(build) {
     build.onResolve({ filter: /\.astro$/ }, (args) => ({
