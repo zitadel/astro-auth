@@ -283,19 +283,20 @@ export const virtualConfigModule = (
         this.addWatchFile(cfg);
       }
     },
-    handleHotUpdate: async function (ctx) {
-      const resolved = await ctx.server.pluginContainer.resolveId(configFile);
+    hotUpdate: async function (options) {
+      const resolved =
+        await this.environment.pluginContainer.resolveId(configFile);
       const configPath = resolved && resolved.id ? resolved.id : null;
-      if (configPath && ctx.file === configPath) {
-        const mod = ctx.server.moduleGraph.getModuleById(resolvedId);
+      if (configPath && options.file === configPath) {
+        const mod = this.environment.moduleGraph.getModuleById(resolvedId);
         if (mod) {
-          ctx.server.moduleGraph.invalidateModule(mod);
+          this.environment.moduleGraph.invalidateModule(mod);
         }
-        return [ctx.server.moduleGraph.getModuleById(configPath)!].filter(
-          Boolean,
-        );
+        const updatedModule =
+          this.environment.moduleGraph.getModuleById(configPath);
+        return updatedModule ? [updatedModule] : [];
       } else {
-        return undefined;
+        return;
       }
     },
   };
