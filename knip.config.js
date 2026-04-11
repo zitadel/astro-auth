@@ -1,5 +1,13 @@
 module.exports = {
-  ignoreDependencies: ['@semantic-release/.*?', 'auth'],
+  ignoreDependencies: [
+    '@commitlint/config-conventional',
+    '@semantic-release/.*?',
+    'auth',
+  ],
   entry: ['src/api/**/*.ts'],
-  ignore: ['src/components/index.d.ts', 'typedoc.config.mjs'],
+  ignore: [
+    'commitlint.config.js',
+    'src/components/index.d.ts',
+    'typedoc.config.mjs',
+  ],
 };
