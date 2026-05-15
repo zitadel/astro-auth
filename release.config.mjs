@@ -18,18 +18,11 @@ export default {
     '@semantic-release/release-notes-generator',
     [
       '@semantic-release/npm',
-      {
-        npmPublish: true,
-        pkgRoot: '.',
-        tarballDir: '.',
-        access: 'public',
-      },
+      { npmPublish: true, pkgRoot: '.', tarballDir: '.', access: 'public' },
     ],
     [
       '@semantic-release/github',
-      {
-        assets: [{ path: '*.tgz', label: 'Package' }],
-      },
+      { assets: [{ path: '*.tgz', label: 'Package' }] },
     ],
     [
       '@semantic-release/git',
