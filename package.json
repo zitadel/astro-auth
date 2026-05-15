@@ -67,6 +67,7 @@
     "@semantic-release/github": "^12.0.0",
     "@semantic-release/npm": "^13.1.5",
     "@semantic-release/release-notes-generator": "^14.1.0",
+    "@tsconfig/node22": "^22.0.2",
     "@types/jest": "^30.0.0",
     "@types/node": "^22.18.13",
     "astro": "^6.0.0",
