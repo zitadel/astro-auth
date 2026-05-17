@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getSession } from '@zitadel/astro-auth/server';
-import { createAuthOptions } from '../../lib/auth';
+import { createAuthOptions } from '../../lib/auth.js';
 
 /** Protected endpoint — returns 403 when the request is unauthenticated. */
 // noinspection JSUnusedGlobalSymbols
