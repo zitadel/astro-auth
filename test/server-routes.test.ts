@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 // Integration tests spin up a real dev server — increase the per-test timeout.
 jest.setTimeout(120_000);
 
-const PORT = 3003;
+const PORT = 3853;
 const BASE_URL = `http://localhost:${PORT}`;
 const AUTH_BASE = `${BASE_URL}/api/auth`;
 const AUTH_SECRET = 'test-secret-for-e2e-testing-only-32ch';
@@ -18,8 +18,12 @@ let devServer: ChildProcess;
 // ---------------------------------------------------------------------------
 
 function getSetCookies(res: Response): string[] {
-  if (typeof (res.headers as Record<string, unknown>).getSetCookie === 'function') {
-    return (res.headers as unknown as { getSetCookie(): string[] }).getSetCookie();
+  if (
+    typeof (res.headers as Record<string, unknown>).getSetCookie === 'function'
+  ) {
+    return (
+      res.headers as unknown as { getSetCookie(): string[] }
+    ).getSetCookie();
   }
   const raw: string[] = [];
   res.headers.forEach((value, key) => {
@@ -35,7 +39,10 @@ function cookieHeaderFrom(setCookies: string[]): string {
 async function getCsrf(): Promise<{ token: string; cookie: string }> {
   const res = await fetch(`${AUTH_BASE}/csrf`);
   const body = (await res.json()) as { csrfToken: string };
-  return { token: body.csrfToken, cookie: cookieHeaderFrom(getSetCookies(res)) };
+  return {
+    token: body.csrfToken,
+    cookie: cookieHeaderFrom(getSetCookies(res)),
+  };
 }
 
 /** Sign in and collect all Set-Cookie values (including session-token). */
@@ -47,7 +54,7 @@ async function signIn(username: string, password: string): Promise<string[]> {
     csrfToken: token,
     callbackUrl: `${BASE_URL}/profile`,
   });
-  const signInRes = await fetch(`${AUTH_BASE}/signin/credentials`, {
+  const signInRes = await fetch(`${AUTH_BASE}/callback/credentials`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -61,7 +68,9 @@ async function signIn(username: string, password: string): Promise<string[]> {
   const location = signInRes.headers.get('location');
   if (!location) return signInCookies;
 
-  const callbackHref = location.startsWith('/') ? `${BASE_URL}${location}` : location;
+  const callbackHref = location.startsWith('/')
+    ? `${BASE_URL}${location}`
+    : location;
   if (!callbackHref.startsWith(BASE_URL)) return signInCookies;
 
   const callbackRes = await fetch(callbackHref, {
@@ -84,8 +93,10 @@ beforeAll(async () => {
     env: {
       ...process.env,
       AUTH_SECRET,
+      AUTH_URL: BASE_URL,
       PORT: String(PORT),
     },
+    detached: true,
     stdio: 'pipe',
   });
 
@@ -113,7 +124,7 @@ beforeAll(async () => {
 }, 120_000);
 
 afterAll(() => {
-  devServer.kill('SIGTERM');
+  if (devServer.pid != null) process.kill(-devServer.pid, 'SIGTERM');
 });
 
 // ---------------------------------------------------------------------------

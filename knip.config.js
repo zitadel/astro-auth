@@ -14,5 +14,6 @@ module.exports = {
     'build/**',
     'src/components/index.d.ts',
     'typedoc.config.mjs',
+    'playground/**',
   ],
 };

@@ -9,6 +9,9 @@ try { process.loadEnvFile?.('.env'); } catch { /* .env may not exist */ }
 export default defineConfig({
   integrations: [auth()],
   output: 'server',
+  security: {
+    checkOrigin: false,
+  },
   adapter: node({
     mode: 'standalone',
   }),

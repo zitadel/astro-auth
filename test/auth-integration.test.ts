@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 // Integration tests spin up a real dev server — increase the per-test timeout.
 jest.setTimeout(120_000);
 
-const PORT = 3002;
+const PORT = 3852;
 const BASE_URL = `http://localhost:${PORT}`;
 const AUTH_BASE = `${BASE_URL}/api/auth`;
 const AUTH_SECRET = 'test-secret-for-e2e-testing-only-32ch';
@@ -20,8 +20,12 @@ let devServer: ChildProcess;
 /** Extract all Set-Cookie values from a Response. */
 function getSetCookies(res: Response): string[] {
   // headers.getSetCookie() handles multi-value Set-Cookie headers correctly.
-  if (typeof (res.headers as Record<string, unknown>).getSetCookie === 'function') {
-    return (res.headers as unknown as { getSetCookie(): string[] }).getSetCookie();
+  if (
+    typeof (res.headers as Record<string, unknown>).getSetCookie === 'function'
+  ) {
+    return (
+      res.headers as unknown as { getSetCookie(): string[] }
+    ).getSetCookie();
   }
   const raw: string[] = [];
   res.headers.forEach((value, key) => {
@@ -39,7 +43,10 @@ function cookieHeaderFrom(setCookies: string[]): string {
 async function getCsrf(): Promise<{ token: string; cookie: string }> {
   const res = await fetch(`${AUTH_BASE}/csrf`);
   const body = (await res.json()) as { csrfToken: string };
-  return { token: body.csrfToken, cookie: cookieHeaderFrom(getSetCookies(res)) };
+  return {
+    token: body.csrfToken,
+    cookie: cookieHeaderFrom(getSetCookies(res)),
+  };
 }
 
 /**
@@ -59,7 +66,7 @@ async function postSignIn(
     csrfToken,
     callbackUrl,
   });
-  return fetch(`${AUTH_BASE}/signin/credentials`, {
+  return fetch(`${AUTH_BASE}/callback/credentials`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -80,14 +87,22 @@ async function signIn(
   callbackUrl?: string,
 ): Promise<{ cookies: string[]; finalUrl: string }> {
   const { token, cookie } = await getCsrf();
-  const signInRes = await postSignIn(username, password, token, cookie, callbackUrl);
+  const signInRes = await postSignIn(
+    username,
+    password,
+    token,
+    cookie,
+    callbackUrl,
+  );
   const signInCookies = getSetCookies(signInRes);
 
   const location = signInRes.headers.get('location');
   if (!location) return { cookies: signInCookies, finalUrl: '' };
 
   // Follow the callback redirect (stays on the same host).
-  const callbackHref = location.startsWith('/') ? `${BASE_URL}${location}` : location;
+  const callbackHref = location.startsWith('/')
+    ? `${BASE_URL}${location}`
+    : location;
   if (!callbackHref.startsWith(BASE_URL)) {
     // External redirect – Auth.js blocked it; return without following.
     return { cookies: signInCookies, finalUrl: callbackHref };
@@ -115,8 +130,10 @@ beforeAll(async () => {
     env: {
       ...process.env,
       AUTH_SECRET,
+      AUTH_URL: BASE_URL,
       PORT: String(PORT),
     },
+    detached: true,
     stdio: 'pipe',
   });
 
@@ -144,7 +161,7 @@ beforeAll(async () => {
 }, 120_000);
 
 afterAll(() => {
-  devServer.kill('SIGTERM');
+  if (devServer.pid != null) process.kill(-devServer.pid, 'SIGTERM');
 });
 
 // ---------------------------------------------------------------------------
@@ -187,7 +204,9 @@ describe('Providers endpoint', () => {
   it('includes a credentials provider', async () => {
     const res = await fetch(`${AUTH_BASE}/providers`);
     const body = (await res.json()) as Record<string, { type: string }>;
-    const hasCredentials = Object.values(body).some((p) => p.type === 'credentials');
+    const hasCredentials = Object.values(body).some(
+      (p) => p.type === 'credentials',
+    );
     expect(hasCredentials).toBe(true);
   });
 });
@@ -234,13 +253,17 @@ describe('Credentials authentication', () => {
 
   it('valid credentials set an authjs.session-token cookie', async () => {
     const { cookies } = await signIn('jsmith', 'hunter2');
-    const hasSession = cookies.some((c) => c.startsWith('authjs.session-token'));
+    const hasSession = cookies.some((c) =>
+      c.startsWith('authjs.session-token'),
+    );
     expect(hasSession).toBe(true);
   });
 
   it('invalid password does not set a session cookie', async () => {
     const { cookies } = await signIn('jsmith', 'wrongpassword');
-    const hasSession = cookies.some((c) => c.startsWith('authjs.session-token'));
+    const hasSession = cookies.some((c) =>
+      c.startsWith('authjs.session-token'),
+    );
     expect(hasSession).toBe(false);
   });
 
@@ -287,7 +310,9 @@ describe('Signout', () => {
       redirect: 'manual',
     });
     const cleared = getSetCookies(res).find(
-      (c) => c.includes('authjs.session-token') && c.toLowerCase().includes('max-age=0'),
+      (c) =>
+        c.includes('authjs.session-token') &&
+        c.toLowerCase().includes('max-age=0'),
     );
     expect(cleared).toBeDefined();
   });
@@ -314,7 +339,13 @@ describe('Security: open redirect prevention', () => {
 
   it('allows relative callback URLs', async () => {
     const { token, cookie } = await getCsrf();
-    const res = await postSignIn('jsmith', 'hunter2', token, cookie, '/dashboard');
+    const res = await postSignIn(
+      'jsmith',
+      'hunter2',
+      token,
+      cookie,
+      '/dashboard',
+    );
     const location = res.headers.get('location') ?? '';
     expect(location).toContain('/dashboard');
     expect(location).not.toContain('evil.com');
@@ -322,7 +353,13 @@ describe('Security: open redirect prevention', () => {
 
   it('handles protocol-relative URLs safely', async () => {
     const { token, cookie } = await getCsrf();
-    const res = await postSignIn('jsmith', 'hunter2', token, cookie, '//evil.com/steal');
+    const res = await postSignIn(
+      'jsmith',
+      'hunter2',
+      token,
+      cookie,
+      '//evil.com/steal',
+    );
     const location = res.headers.get('location') ?? '';
     const locationUrl = new URL(location, BASE_URL);
     expect(locationUrl.host).not.toBe('evil.com');
@@ -330,7 +367,13 @@ describe('Security: open redirect prevention', () => {
 
   it('rejects javascript: protocol URLs', async () => {
     const { token, cookie } = await getCsrf();
-    const res = await postSignIn('jsmith', 'hunter2', token, cookie, 'javascript:alert(1)');
+    const res = await postSignIn(
+      'jsmith',
+      'hunter2',
+      token,
+      cookie,
+      'javascript:alert(1)',
+    );
     const location = res.headers.get('location') ?? '';
     expect(location).not.toContain('javascript:');
   });
@@ -338,7 +381,10 @@ describe('Security: open redirect prevention', () => {
   it('rejects data: protocol URLs', async () => {
     const { token, cookie } = await getCsrf();
     const res = await postSignIn(
-      'jsmith', 'hunter2', token, cookie,
+      'jsmith',
+      'hunter2',
+      token,
+      cookie,
       'data:text/html,<script>alert(1)</script>',
     );
     const location = res.headers.get('location') ?? '';
@@ -349,7 +395,9 @@ describe('Security: open redirect prevention', () => {
 describe('Security: cookie attributes', () => {
   it('session cookie carries the HttpOnly flag', async () => {
     const { cookies } = await signIn('jsmith', 'hunter2');
-    const sessionCookie = cookies.find((c) => c.includes('authjs.session-token'));
+    const sessionCookie = cookies.find((c) =>
+      c.includes('authjs.session-token'),
+    );
     if (sessionCookie) {
       expect(sessionCookie.toLowerCase()).toContain('httponly');
     }
@@ -357,19 +405,25 @@ describe('Security: cookie attributes', () => {
 
   it('session cookie has SameSite attribute', async () => {
     const res = await fetch(`${AUTH_BASE}/csrf`);
-    const csrfCookie = getSetCookies(res).find((c) => c.includes('authjs.csrf-token'));
+    const csrfCookie = getSetCookies(res).find((c) =>
+      c.includes('authjs.csrf-token'),
+    );
     expect(csrfCookie).toContain('SameSite');
   });
 
   it('session cookie has proper Path attribute', async () => {
     const { cookies } = await signIn('jsmith', 'hunter2');
-    const sessionCookie = cookies.find((c) => c.includes('authjs.session-token'));
+    const sessionCookie = cookies.find((c) =>
+      c.includes('authjs.session-token'),
+    );
     expect(sessionCookie).toContain('Path=/');
   });
 
   it('csrf cookie has HttpOnly flag', async () => {
     const res = await fetch(`${AUTH_BASE}/csrf`);
-    const csrfCookie = getSetCookies(res).find((c) => c.includes('authjs.csrf-token'));
+    const csrfCookie = getSetCookies(res).find((c) =>
+      c.includes('authjs.csrf-token'),
+    );
     expect(csrfCookie?.toLowerCase()).toContain('httponly');
   });
 });
@@ -391,13 +445,23 @@ describe('Security: malicious input handling', () => {
 
   it('handles XSS payload in username', async () => {
     const { token, cookie } = await getCsrf();
-    const res = await postSignIn('<script>alert(1)</script>', 'password', token, cookie);
+    const res = await postSignIn(
+      '<script>alert(1)</script>',
+      'password',
+      token,
+      cookie,
+    );
     expect(res.status).toBe(302);
   });
 
   it('handles XSS payload in password', async () => {
     const { token, cookie } = await getCsrf();
-    const res = await postSignIn('jsmith', '<script>alert(1)</script>', token, cookie);
+    const res = await postSignIn(
+      'jsmith',
+      '<script>alert(1)</script>',
+      token,
+      cookie,
+    );
     expect(res.status).toBe(302);
   });
 
@@ -450,7 +514,9 @@ describe('Security: session management', () => {
       redirect: 'manual',
     });
     const cleared = getSetCookies(res).find(
-      (c) => c.includes('authjs.session-token') && c.toLowerCase().includes('max-age=0'),
+      (c) =>
+        c.includes('authjs.session-token') &&
+        c.toLowerCase().includes('max-age=0'),
     );
     expect(cleared).toBeDefined();
   });
@@ -462,8 +528,12 @@ describe('Security: information disclosure', () => {
     const res1 = await postSignIn('wronguser', 'hunter2', t1, c1);
     const { token: t2, cookie: c2 } = await getCsrf();
     const res2 = await postSignIn('jsmith', 'wrongpass', t2, c2);
-    const err1 = (res1.headers.get('location') ?? '').match(/error=([^&]+)/)?.[1];
-    const err2 = (res2.headers.get('location') ?? '').match(/error=([^&]+)/)?.[1];
+    const err1 = (res1.headers.get('location') ?? '').match(
+      /error=([^&]+)/,
+    )?.[1];
+    const err2 = (res2.headers.get('location') ?? '').match(
+      /error=([^&]+)/,
+    )?.[1];
     expect(err1).toBeDefined();
     expect(err1).toBe(err2);
   });
@@ -480,7 +550,9 @@ describe('Security: information disclosure', () => {
     const { token, cookie } = await getCsrf();
     const res = await postSignIn('invalid', 'invalid', token, cookie);
     const location = res.headers.get('location') ?? '';
-    const errorPage = location.startsWith('/') ? `${BASE_URL}${location}` : location;
+    const errorPage = location.startsWith('/')
+      ? `${BASE_URL}${location}`
+      : location;
     if (errorPage.startsWith(BASE_URL)) {
       const html = await (await fetch(errorPage)).text();
       expect(html).not.toContain('Error:');
@@ -497,14 +569,16 @@ describe('Security: CSRF protection', () => {
       password: 'hunter2',
       callbackUrl: `${BASE_URL}/profile`,
     });
-    const res = await fetch(`${AUTH_BASE}/signin/credentials`, {
+    const res = await fetch(`${AUTH_BASE}/callback/credentials`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: body.toString(),
       redirect: 'manual',
     });
     const cookies = getSetCookies(res);
-    const hasSession = cookies.some((c) => c.startsWith('authjs.session-token'));
+    const hasSession = cookies.some((c) =>
+      c.startsWith('authjs.session-token'),
+    );
     expect(hasSession).toBe(false);
   });
 
