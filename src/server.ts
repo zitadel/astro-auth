@@ -108,7 +108,7 @@ export async function getSession(
   setEnvDefaults(process.env, config);
   const url = createActionURL(
     'session',
-    new URL(req.url).protocol.replace(':', ''),
+    new URL(req.url).protocol.slice(0, -1) as 'http' | 'https',
     new Headers(req.headers),
     process.env,
     config,
@@ -121,7 +121,7 @@ export async function getSession(
     config,
   );
   const status = response.status ?? 200;
-  const data = await response.json();
+  const data = (await response.json()) as Record<string, unknown> | null;
   if (!data || !Object.keys(data).length) {
     return null;
   } else {
@@ -151,7 +151,7 @@ export async function getSession(
       }
     }
     if (status === 200) {
-      return data as Session;
+      return data as unknown as Session;
     } else {
       throw new Error(
         `[astro-auth] getSession failed: ${status} ${JSON.stringify(data)}`,

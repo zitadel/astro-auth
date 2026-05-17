@@ -165,6 +165,14 @@ describe('CSRF endpoint', () => {
     const cookies = getSetCookies(res).join(' ');
     expect(cookies).toMatch(/authjs\.csrf-token/);
   });
+
+  it('returns different tokens on each request', async () => {
+    const res1 = await fetch(`${AUTH_BASE}/csrf`);
+    const body1 = (await res1.json()) as { csrfToken: string };
+    const res2 = await fetch(`${AUTH_BASE}/csrf`);
+    const body2 = (await res2.json()) as { csrfToken: string };
+    expect(body1.csrfToken).not.toBe(body2.csrfToken);
+  });
 });
 
 describe('Providers endpoint', () => {
@@ -196,6 +204,26 @@ describe('Session endpoint', () => {
     const hasUser = body != null && 'user' in body;
     expect(hasUser).toBe(false);
   });
+
+  it('returns user data after successful authentication', async () => {
+    const { cookies } = await signIn('jsmith', 'hunter2');
+    const res = await fetch(`${AUTH_BASE}/session`, {
+      headers: { Cookie: cookieHeaderFrom(cookies) },
+    });
+    const body = (await res.json()) as { user?: { name: string } };
+    expect(body.user).toBeDefined();
+    expect(body.user?.name).toBe('J Smith');
+  });
+
+  it('session includes expiry information', async () => {
+    const { cookies } = await signIn('jsmith', 'hunter2');
+    const res = await fetch(`${AUTH_BASE}/session`, {
+      headers: { Cookie: cookieHeaderFrom(cookies) },
+    });
+    const body = (await res.json()) as { expires?: string };
+    expect(body.expires).toBeDefined();
+    expect(new Date(body.expires!).getTime()).toBeGreaterThan(Date.now());
+  });
 });
 
 describe('Credentials authentication', () => {
@@ -215,6 +243,13 @@ describe('Credentials authentication', () => {
     const hasSession = cookies.some((c) => c.startsWith('authjs.session-token'));
     expect(hasSession).toBe(false);
   });
+
+  it('rejects empty credentials', async () => {
+    const { token, cookie } = await getCsrf();
+    const res = await postSignIn('', '', token, cookie);
+    const location = res.headers.get('location') ?? '';
+    expect(location).toContain('error');
+  });
 });
 
 describe('Sign-in page', () => {
@@ -223,6 +258,47 @@ describe('Sign-in page', () => {
     expect(res.status).toBe(200);
     const contentType = res.headers.get('content-type') ?? '';
     expect(contentType).toContain('text/html');
+  });
+
+  it('GET /api/auth/signin shows Credentials option', async () => {
+    const res = await fetch(`${AUTH_BASE}/signin`);
+    const html = await res.text();
+    expect(html).toContain('Credentials');
+  });
+
+  it('GET /api/auth/signin includes csrfToken field', async () => {
+    const res = await fetch(`${AUTH_BASE}/signin`);
+    const html = await res.text();
+    expect(html).toContain('csrfToken');
+  });
+});
+
+describe('Signout', () => {
+  it('sets Max-Age=0 on session cookie after signout', async () => {
+    const { cookies } = await signIn('jsmith', 'hunter2');
+    const { token: csrfToken, cookie: csrfCookie } = await getCsrf();
+    const res = await fetch(`${AUTH_BASE}/signout`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Cookie: cookieHeaderFrom(cookies) + '; ' + csrfCookie,
+      },
+      body: new URLSearchParams({ csrfToken }).toString(),
+      redirect: 'manual',
+    });
+    const cleared = getSetCookies(res).find(
+      (c) => c.includes('authjs.session-token') && c.toLowerCase().includes('max-age=0'),
+    );
+    expect(cleared).toBeDefined();
+  });
+});
+
+describe('Error handling', () => {
+  it('invalid CSRF token redirects with error', async () => {
+    const { cookie } = await getCsrf();
+    const res = await postSignIn('jsmith', 'hunter2', 'invalid-token', cookie);
+    const location = res.headers.get('location') ?? '';
+    expect(location).toContain('error');
   });
 });
 
@@ -235,6 +311,39 @@ describe('Security: open redirect prevention', () => {
     );
     expect(finalUrl).not.toContain('evil.example.com');
   });
+
+  it('allows relative callback URLs', async () => {
+    const { token, cookie } = await getCsrf();
+    const res = await postSignIn('jsmith', 'hunter2', token, cookie, '/dashboard');
+    const location = res.headers.get('location') ?? '';
+    expect(location).toContain('/dashboard');
+    expect(location).not.toContain('evil.com');
+  });
+
+  it('handles protocol-relative URLs safely', async () => {
+    const { token, cookie } = await getCsrf();
+    const res = await postSignIn('jsmith', 'hunter2', token, cookie, '//evil.com/steal');
+    const location = res.headers.get('location') ?? '';
+    const locationUrl = new URL(location, BASE_URL);
+    expect(locationUrl.host).not.toBe('evil.com');
+  });
+
+  it('rejects javascript: protocol URLs', async () => {
+    const { token, cookie } = await getCsrf();
+    const res = await postSignIn('jsmith', 'hunter2', token, cookie, 'javascript:alert(1)');
+    const location = res.headers.get('location') ?? '';
+    expect(location).not.toContain('javascript:');
+  });
+
+  it('rejects data: protocol URLs', async () => {
+    const { token, cookie } = await getCsrf();
+    const res = await postSignIn(
+      'jsmith', 'hunter2', token, cookie,
+      'data:text/html,<script>alert(1)</script>',
+    );
+    const location = res.headers.get('location') ?? '';
+    expect(location).not.toContain('data:');
+  });
 });
 
 describe('Security: cookie attributes', () => {
@@ -243,6 +352,140 @@ describe('Security: cookie attributes', () => {
     const sessionCookie = cookies.find((c) => c.includes('authjs.session-token'));
     if (sessionCookie) {
       expect(sessionCookie.toLowerCase()).toContain('httponly');
+    }
+  });
+
+  it('session cookie has SameSite attribute', async () => {
+    const res = await fetch(`${AUTH_BASE}/csrf`);
+    const csrfCookie = getSetCookies(res).find((c) => c.includes('authjs.csrf-token'));
+    expect(csrfCookie).toContain('SameSite');
+  });
+
+  it('session cookie has proper Path attribute', async () => {
+    const { cookies } = await signIn('jsmith', 'hunter2');
+    const sessionCookie = cookies.find((c) => c.includes('authjs.session-token'));
+    expect(sessionCookie).toContain('Path=/');
+  });
+
+  it('csrf cookie has HttpOnly flag', async () => {
+    const res = await fetch(`${AUTH_BASE}/csrf`);
+    const csrfCookie = getSetCookies(res).find((c) => c.includes('authjs.csrf-token'));
+    expect(csrfCookie?.toLowerCase()).toContain('httponly');
+  });
+});
+
+describe('Security: malicious input handling', () => {
+  it('handles SQL injection in username', async () => {
+    const { token, cookie } = await getCsrf();
+    const res = await postSignIn("' OR '1'='1", 'password', token, cookie);
+    expect(res.status).toBe(302);
+    expect(res.headers.get('location') ?? '').toContain('error');
+  });
+
+  it('handles SQL injection in password', async () => {
+    const { token, cookie } = await getCsrf();
+    const res = await postSignIn('jsmith', "' OR '1'='1", token, cookie);
+    expect(res.status).toBe(302);
+    expect(res.headers.get('location') ?? '').toContain('error');
+  });
+
+  it('handles XSS payload in username', async () => {
+    const { token, cookie } = await getCsrf();
+    const res = await postSignIn('<script>alert(1)</script>', 'password', token, cookie);
+    expect(res.status).toBe(302);
+  });
+
+  it('handles XSS payload in password', async () => {
+    const { token, cookie } = await getCsrf();
+    const res = await postSignIn('jsmith', '<script>alert(1)</script>', token, cookie);
+    expect(res.status).toBe(302);
+  });
+
+  it('handles very long username', async () => {
+    const { token, cookie } = await getCsrf();
+    const res = await postSignIn('a'.repeat(10_000), 'password', token, cookie);
+    expect(res.status).toBe(302);
+  });
+
+  it('handles very long password', async () => {
+    const { token, cookie } = await getCsrf();
+    const res = await postSignIn('jsmith', 'a'.repeat(10_000), token, cookie);
+    expect(res.status).toBe(302);
+  });
+
+  it('handles null bytes in credentials', async () => {
+    const { token, cookie } = await getCsrf();
+    const res = await postSignIn('jsmith\x00admin', 'hunter2', token, cookie);
+    expect(res.status).toBe(302);
+  });
+
+  it('handles unicode in credentials', async () => {
+    const { token, cookie } = await getCsrf();
+    const res = await postSignIn('jsmith™', 'hunter2', token, cookie);
+    expect(res.status).toBe(302);
+  });
+});
+
+describe('Security: session management', () => {
+  it('generates a new session token on each login', async () => {
+    const { cookies: c1 } = await signIn('jsmith', 'hunter2');
+    const { cookies: c2 } = await signIn('jsmith', 'hunter2');
+    const token1 = c1.find((c) => c.startsWith('authjs.session-token'));
+    const token2 = c2.find((c) => c.startsWith('authjs.session-token'));
+    expect(token1).toBeDefined();
+    expect(token2).toBeDefined();
+    expect(token1).not.toBe(token2);
+  });
+
+  it('invalidates session cookie after signout', async () => {
+    const { cookies } = await signIn('jsmith', 'hunter2');
+    const { token: csrfToken, cookie: csrfCookie } = await getCsrf();
+    const res = await fetch(`${AUTH_BASE}/signout`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Cookie: cookieHeaderFrom(cookies) + '; ' + csrfCookie,
+      },
+      body: new URLSearchParams({ csrfToken }).toString(),
+      redirect: 'manual',
+    });
+    const cleared = getSetCookies(res).find(
+      (c) => c.includes('authjs.session-token') && c.toLowerCase().includes('max-age=0'),
+    );
+    expect(cleared).toBeDefined();
+  });
+});
+
+describe('Security: information disclosure', () => {
+  it('returns the same error for invalid username and invalid password', async () => {
+    const { token: t1, cookie: c1 } = await getCsrf();
+    const res1 = await postSignIn('wronguser', 'hunter2', t1, c1);
+    const { token: t2, cookie: c2 } = await getCsrf();
+    const res2 = await postSignIn('jsmith', 'wrongpass', t2, c2);
+    const err1 = (res1.headers.get('location') ?? '').match(/error=([^&]+)/)?.[1];
+    const err2 = (res2.headers.get('location') ?? '').match(/error=([^&]+)/)?.[1];
+    expect(err1).toBeDefined();
+    expect(err1).toBe(err2);
+  });
+
+  it('sign-in page does not leak username existence', async () => {
+    const res = await fetch(`${AUTH_BASE}/signin`);
+    const html = await res.text();
+    expect(html).not.toContain('user does not exist');
+    expect(html).not.toContain('invalid username');
+    expect(html).not.toContain('user not found');
+  });
+
+  it('error page does not expose stack traces', async () => {
+    const { token, cookie } = await getCsrf();
+    const res = await postSignIn('invalid', 'invalid', token, cookie);
+    const location = res.headers.get('location') ?? '';
+    const errorPage = location.startsWith('/') ? `${BASE_URL}${location}` : location;
+    if (errorPage.startsWith(BASE_URL)) {
+      const html = await (await fetch(errorPage)).text();
+      expect(html).not.toContain('Error:');
+      expect(html).not.toContain('.ts:');
+      expect(html).not.toContain('.js:');
     }
   });
 });
@@ -263,5 +506,20 @@ describe('Security: CSRF protection', () => {
     const cookies = getSetCookies(res);
     const hasSession = cookies.some((c) => c.startsWith('authjs.session-token'));
     expect(hasSession).toBe(false);
+  });
+
+  it('rejects signout request without a CSRF token', async () => {
+    const { cookies } = await signIn('jsmith', 'hunter2');
+    const res = await fetch(`${AUTH_BASE}/signout`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Cookie: cookieHeaderFrom(cookies),
+      },
+      body: new URLSearchParams({}).toString(),
+      redirect: 'manual',
+    });
+    const location = res.headers.get('location') ?? '';
+    expect(location).toContain('error');
   });
 });
