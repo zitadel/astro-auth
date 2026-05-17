@@ -105,6 +105,7 @@ export async function getSession(
   req: Request,
   config: AstroAuthConfig,
 ): Promise<Session | null> {
+  config.basePath ??= '/api/auth';
   setEnvDefaults(process.env, config);
   const url = createActionURL(
     'session',
