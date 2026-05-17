@@ -21,6 +21,9 @@
     "./components": {
       "types": "./dist/components/index.d.ts",
       "import": "./dist/components/index.js"
+    },
+    "./adapters": {
+      "types": "./dist/adapter.d.ts"
     }
   },
   "files": [
@@ -51,7 +54,9 @@
     "lint": "npx eslint .",
     "lint:fix": "npx eslint . --fix",
     "depcheck": "npx knip",
-    "docs": "typedoc"
+    "docs": "typedoc",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "peerDependencies": {
     "@auth/core": ">=0.40.0",
@@ -85,7 +90,9 @@
     "ts-jest": "29.4.0",
     "tsup": "^8.5.0",
     "typedoc": "^0.28.7",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "@playwright/test": "^1.52.0",
+    "testcontainers": "^11.12.0"
   },
   "keywords": [
     "astro",

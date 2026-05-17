@@ -1,7 +1,18 @@
 // noinspection JSUnusedGlobalSymbols
+/** @type {import('typedoc').TypeDocOptions} */
 export default {
-  entryPoints: ['src/index.ts'],
-  out: '.out/docs',
+  entryPoints: [
+    'src/index.ts',
+    'src/client.ts',
+    'src/server.ts',
+    'src/adapter.ts',
+    'src/components/index.ts',
+  ],
+  out: 'docs',
+  tsconfig: './tsconfig.json',
+  readme: 'none',
+  excludeInternal: true,
+  excludePrivate: true,
   highlightLanguages: [
     'typescript',
     'javascript',
@@ -13,6 +24,14 @@ export default {
     'html',
   ],
   externalSymbolLinkMappings: {
+    oauth4webapi: {
+      'TokenEndpointResponse.expires_in':
+        'https://github.com/panva/oauth4webapi/blob/HEAD/docs/interfaces/TokenEndpointResponse.md',
+      'TokenEndpointResponse.access_token':
+        'https://github.com/panva/oauth4webapi/blob/HEAD/docs/interfaces/TokenEndpointResponse.md',
+      'TokenEndpointResponse.refresh_token':
+        'https://github.com/panva/oauth4webapi/blob/HEAD/docs/interfaces/TokenEndpointResponse.md',
+    },
     '@auth/core': {
       'AuthConfig.adapter': 'https://authjs.dev/reference/core#adapter',
       'AuthConfig.session': 'https://authjs.dev/reference/core#session',

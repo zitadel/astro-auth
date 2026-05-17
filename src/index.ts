@@ -74,3 +74,4 @@ export { default } from './integration.js';
 export { defineConfig } from './config.js';
 export type { FullAuthConfig } from './config.js';
 export type { AuthEnvVars, AstroIntegrationOptions } from './config.js';
+export { AuthError, CredentialsSignin } from '@auth/core/errors';

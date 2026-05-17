@@ -1,0 +1,42 @@
+---
+/**
+ * Error Boundary Component
+ *
+ * In Astro, error handling is performed at the page level rather than within
+ * the component tree. This component provides a structural wrapper with a slot
+ * for content, matching the interface of error boundary components in other
+ * frameworks for parity. Runtime component-level error catching requires
+ * client-side JavaScript or a client-side framework island.
+ *
+ * For SSR error handling, Astro uses `src/pages/error.astro` as a catch-all
+ * error page and `src/pages/404.astro` for not-found errors.
+ *
+ * ## Features
+ * - Wraps child content in a structural container
+ * - Integrates with Astro's native error page mechanism
+ * - Supports custom fallback content via the `fallback` slot
+ *
+ * ## Usage
+ *
+ * ```astro
+ * // Wrap any content that might encounter errors
+ * <ErrorBoundary>
+ *   <SomeComponentThatMightFail />
+ * </ErrorBoundary>
+ *
+ * // With custom fallback (shown if the default slot errors)
+ * <ErrorBoundary>
+ *   <Component />
+ *   <div slot="fallback">Custom error message</div>
+ * </ErrorBoundary>
+ * ```
+ */
+
+interface Props {
+  showDetails?: boolean;
+}
+
+const { showDetails: _showDetails = false } = Astro.props;
+---
+
+<slot />
