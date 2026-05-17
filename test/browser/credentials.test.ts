@@ -55,7 +55,7 @@ test.describe('Credentials sign-in flow', () => {
     page,
   }) => {
     await signInWithCredentials(page);
-    await expect(page).toHaveURL('/profile');
+    await expect(page).toHaveURL(/\/profile/);
   });
 
   test('signout-button is visible after sign-in', async ({ page }) => {

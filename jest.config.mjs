@@ -41,6 +41,8 @@ export default {
         '/frontend/',
         '/dist/',
         '<rootDir>/test/client.test.ts',
+        '<rootDir>/test/browser',
+        '<rootDir>/playground',
       ],
     },
     {

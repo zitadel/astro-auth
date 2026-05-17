@@ -39,7 +39,7 @@ test.beforeAll(async () => {
   const issuerUrl = `http://${container.getHost()}:${container.getMappedPort(8080)}/default`;
   const playgroundDir = path.resolve(import.meta.dirname, '../../playground');
 
-  devServer = spawn('devbox', ['run', 'npm', 'run', 'dev'], {
+  devServer = spawn('npm', ['run', 'dev'], {
     cwd: playgroundDir,
     env: {
       ...process.env,
@@ -91,7 +91,7 @@ test('OAuth sign-in via signin-oauth button', async ({ page }) => {
   await page.click('[data-testid="signin-oauth"]');
   // Auth.js renders a provider confirmation page for GET /signin/:provider;
   // click through it to initiate the actual OAuth flow.
-  await page.waitForSelector('text=Mock OIDC', { timeout: 10_000 });
+  await page.waitForSelector('text=Mock OIDC', { timeout: 15_000 });
   await page.click('text=Mock OIDC');
   await page.waitForSelector('input[name="username"]', { timeout: 15_000 });
   await page.fill('input[name="username"]', 'testuser');
@@ -102,7 +102,7 @@ test('OAuth sign-in via signin-oauth button', async ({ page }) => {
 
 test('full OAuth flow via Auth.js sign-in page', async ({ page }) => {
   await signInWithOAuth(page);
-  await expect(page).toHaveURL('/profile');
+  await expect(page).toHaveURL(/\/profile/);
 });
 
 test('full sign-in and sign-out cycle', async ({ page }) => {

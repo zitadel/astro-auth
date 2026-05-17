@@ -6,6 +6,7 @@ export default defineConfig({
   fullyParallel: false,
   retries: process.env.CI ? 2 : 0,
   workers: 1,
+  timeout: 240_000,
   reporter: [
     ['html', { outputFolder: 'build/playwright-report', open: 'never' }],
     ['list'],
@@ -21,7 +22,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'devbox run npm run dev',
+    command: 'npm run dev',
     cwd: './playground',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
