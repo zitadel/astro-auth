@@ -12,7 +12,7 @@ export default defineConfig({
     ['list'],
   ],
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:3850',
     trace: 'on-first-retry',
   },
   projects: [
@@ -24,11 +24,12 @@ export default defineConfig({
   webServer: {
     command: 'npm run dev',
     cwd: './playground',
-    url: 'http://localhost:3000',
+    url: 'http://localhost:3850',
     reuseExistingServer: !process.env.CI,
     env: {
       AUTH_SECRET: 'test-secret-for-e2e-testing-only-32ch',
-      PORT: '3000',
+      AUTH_URL: 'http://localhost:3850',
+      PORT: '3850',
     },
     timeout: 120_000,
   },

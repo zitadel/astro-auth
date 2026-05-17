@@ -93,6 +93,7 @@ test.describe('Invalid credentials', () => {
     await page
       .locator('form:has(input[name="username"]) button[type="submit"]')
       .click();
+    await page.waitForURL(/\/api\/auth\/signin|\/auth\/error/, { timeout: 15_000 });
     await page.goto('/profile');
     await expect(page).toHaveURL(/\/auth\/login|\/api\/auth\/signin/);
   });
