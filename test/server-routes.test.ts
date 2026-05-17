@@ -132,6 +132,11 @@ describe('Unauthenticated access', () => {
     const res = await fetch(`${BASE_URL}/api/secured`);
     expect(res.status).toBe(403);
   });
+
+  it('GET /api/protected/middleware returns 403', async () => {
+    const res = await fetch(`${BASE_URL}/api/protected/middleware`);
+    expect(res.status).toBe(403);
+  });
 });
 
 describe('Authenticated access', () => {
@@ -153,6 +158,15 @@ describe('Authenticated access', () => {
 
   it('GET /api/secured returns 200', async () => {
     const res = await fetch(`${BASE_URL}/api/secured`, {
+      headers: { Cookie: sessionCookieHeader },
+    });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { ok: boolean };
+    expect(body.ok).toBe(true);
+  });
+
+  it('GET /api/protected/middleware returns 200', async () => {
+    const res = await fetch(`${BASE_URL}/api/protected/middleware`, {
       headers: { Cookie: sessionCookieHeader },
     });
     expect(res.status).toBe(200);
