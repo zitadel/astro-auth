@@ -6,9 +6,10 @@ import path from 'path';
 const OAUTH_PORT = 3001;
 const BASE_URL = `http://localhost:${OAUTH_PORT}`;
 const AUTH_SIGNIN_URL = '/api/auth/signin';
-const AUTH_SIGNOUT_URL = '/api/auth/signout';
 
-let container: Awaited<ReturnType<InstanceType<typeof GenericContainer>['start']>>;
+let container: Awaited<
+  ReturnType<InstanceType<typeof GenericContainer>['start']>
+>;
 let devServer: ChildProcess;
 
 test.use({ baseURL: BASE_URL });
@@ -23,55 +24,60 @@ async function signInWithOAuth(page: Page): Promise<void> {
   await page.waitForURL(/\/profile/, { timeout: 30_000 });
 }
 
-test.beforeAll(async () => {
-  container = await new GenericContainer(
-    'ghcr.io/navikt/mock-oauth2-server:2.1.10',
-  )
-    .withEnvironment({
-      JSON_CONFIG: JSON.stringify({ interactiveLogin: true }),
-    })
-    .withExposedPorts(8080)
-    .withWaitStrategy(
-      Wait.forHttp('/default/.well-known/openid-configuration', 8080),
+test.beforeAll(
+  async () => {
+    container = await new GenericContainer(
+      'ghcr.io/navikt/mock-oauth2-server:2.1.10',
     )
-    .start();
+      .withEnvironment({
+        JSON_CONFIG: JSON.stringify({ interactiveLogin: true }),
+      })
+      .withExposedPorts(8080)
+      .withWaitStrategy(
+        Wait.forHttp('/default/.well-known/openid-configuration', 8080),
+      )
+      .start();
 
-  const issuerUrl = `http://${container.getHost()}:${container.getMappedPort(8080)}/default`;
-  const playgroundDir = path.resolve(import.meta.dirname, '../../playground');
+    const issuerUrl = `http://${container.getHost()}:${container.getMappedPort(8080)}/default`;
+    const playgroundDir = path.resolve(import.meta.dirname, '../../playground');
 
-  devServer = spawn('npm', ['run', 'dev'], {
-    cwd: playgroundDir,
-    env: {
-      ...process.env,
-      AUTH_SECRET: 'test-secret-for-e2e-testing-only-32ch',
-      PORT: String(OAUTH_PORT),
-      OAUTH_ISSUER_URL: issuerUrl,
-      OAUTH_CLIENT_ID: 'test-client',
-      OAUTH_CLIENT_SECRET: 'test-secret',
-    },
-    stdio: 'pipe',
-  });
+    devServer = spawn('npm', ['run', 'dev'], {
+      cwd: playgroundDir,
+      env: {
+        ...process.env,
+        AUTH_SECRET: 'test-secret-for-e2e-testing-only-32ch',
+        PORT: String(OAUTH_PORT),
+        OAUTH_ISSUER_URL: issuerUrl,
+        OAUTH_CLIENT_ID: 'test-client',
+        OAUTH_CLIENT_SECRET: 'test-secret',
+      },
+      stdio: 'pipe',
+    });
 
-  await new Promise<void>((resolve, reject) => {
-    const timeout = setTimeout(
-      () => reject(new Error('Dev server startup timeout')),
-      120_000,
-    );
-    const check = async () => {
-      try {
-        const res = await fetch(`${BASE_URL}/`);
-        if (res.ok || res.status < 500) {
-          clearTimeout(timeout);
-          resolve();
-          return;
+    await new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(
+        () => reject(new Error('Dev server startup timeout')),
+        120_000,
+      );
+      const check = async () => {
+        try {
+          const res = await fetch(`${BASE_URL}/`);
+          if (res.ok || res.status < 500) {
+            clearTimeout(timeout);
+            resolve();
+            return;
+          }
+        } catch {
+          // Server not ready yet.
         }
-      } catch {}
-      setTimeout(check, 1000);
-    };
-    devServer.on('error', reject);
-    setTimeout(check, 3000);
-  });
-}, { timeout: 120_000 });
+        setTimeout(check, 1000);
+      };
+      devServer.on('error', reject);
+      setTimeout(check, 3000);
+    });
+  },
+  { timeout: 120_000 },
+);
 
 test.afterAll(async () => {
   devServer.kill('SIGTERM');
