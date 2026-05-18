@@ -1,5 +1,5 @@
 /**
- * Client-side sign-in helper for Remix applications.
+ * Client-side sign-in helper for Astro applications.
  *
  * @param provider - The provider ID to sign in with
  * @param options - Sign-in options
@@ -21,7 +21,7 @@ export async function signIn(
 }
 
 /**
- * Client-side sign-out helper for Remix applications.
+ * Client-side sign-out helper for Astro applications.
  *
  * @param options - Sign-out options
  */
