@@ -52,9 +52,7 @@ export interface AstroIntegrationOptions {
  *
  * @public
  */
-export interface FullAuthConfig
-  extends AstroIntegrationOptions,
-    Omit<AuthConfig, 'raw'> {}
+export type FullAuthConfig = AstroIntegrationOptions & Omit<AuthConfig, 'raw'>;
 
 /**
  * Environment variables structure used by Auth.js configuration.
