@@ -6,11 +6,12 @@ export default {
     'src/client.ts',
     'src/server.ts',
     'src/adapter.ts',
+    'src/types.ts',
     'src/components/index.ts',
   ],
   out: 'docs',
   tsconfig: './tsconfig.json',
-  readme: 'none',
+  readme: 'README.md',
   excludeInternal: true,
   excludePrivate: true,
   highlightLanguages: [

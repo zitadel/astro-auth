@@ -1,7 +1,7 @@
 {
   "name": "@zitadel/astro-auth",
   "description": "A comprehensive Auth.js integration for Astro applications with TypeScript support, framework-agnostic HTTP adapters, and role-based access control",
-  "version": "1.4.0",
+  "version": "0.1.0",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -51,7 +51,7 @@
     "test:debug": "jest --verbose --config=jest.config.mjs --runInBand --detectOpenHandles",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "lint": "npx eslint .",
+    "lint": "eslint .",
     "lint:fix": "npx eslint . --fix",
     "depcheck": "npx knip",
     "docs": "typedoc",

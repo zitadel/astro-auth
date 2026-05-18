@@ -40,7 +40,7 @@ export default {
         '/node_modules/',
         '/frontend/',
         '/dist/',
-    '/spec/',
+        '/spec/',
         '<rootDir>/test/client.test.ts',
         '<rootDir>/playground',
       ],
@@ -57,8 +57,7 @@ export default {
   coverageDirectory: './build/coverage',
   collectCoverageFrom: ['src/**/*.{ts,tsx,js,jsx}', '!src/**/*.d.ts'],
   coverageReporters: ['clover', 'cobertura', 'lcov'],
-  coveragePathIgnorePatterns: ['/dist/',
-    '/spec/', '/node_modules/'],
+  coveragePathIgnorePatterns: ['/dist/', '/spec/', '/node_modules/'],
   reporters: [
     'default',
     [

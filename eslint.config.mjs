@@ -4,12 +4,8 @@ import eslintPluginAstro from 'eslint-plugin-astro';
 export default [
   {
     ignores: [
-      'README.md',
-      'README.md/**',
       'docs/**',
       'src/components/index.d.ts',
-      '.vscode/**',
-      '.claude/**',
       'dist/**',
       'build/**',
       '.out/**',
