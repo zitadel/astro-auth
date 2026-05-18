@@ -54,9 +54,9 @@ function AstroAuthHandler(prefix: string, options = authConfig) {
  * ```ts
  * export const { GET, POST } = AstroAuth({
  *   providers: [
- *     GitHub({
- *       clientId: process.env.GITHUB_ID!,
- *       clientSecret: process.env.GITHUB_SECRET!,
+ *     Zitadel({
+ *       clientId: process.env.ZITADEL_CLIENT_ID!,
+ *       clientSecret: process.env.ZITADEL_CLIENT_SECRET!,
  *     }),
  *   ],
  *   debug: false,

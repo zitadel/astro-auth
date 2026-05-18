@@ -246,8 +246,7 @@ export default defineConfig({
 ## Contributing
 
 If you have suggestions for how this integration could be improved, or
-want to report a bug, open an issue - we'd love all and any
-contributions.
+want to report a bug, open an issue — we'd love all and any contributions.
 
 ## License
 

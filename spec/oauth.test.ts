@@ -14,6 +14,12 @@ let devServer: ChildProcess;
 
 test.use({ baseURL: BASE_URL });
 
+/**
+ * Drives the full OAuth login flow against the Mock OIDC container.
+ *
+ * @param page - The Playwright Page instance
+ * @returns Resolves once the browser has navigated to /profile
+ */
 async function signInWithOAuth(page: Page): Promise<void> {
   await page.goto(AUTH_SIGNIN_URL);
   await page.waitForSelector('text=Mock OIDC', { timeout: 15_000 });
