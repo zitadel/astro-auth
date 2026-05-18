@@ -8,15 +8,6 @@ import type { AuthConfig } from '@auth/core/types';
 export type { BuiltInProviders } from '@auth/core/providers';
 
 /**
- * Utility type for string literals with autocomplete support.
- *
- * @internal
- */
-export type LiteralUnion<T extends U, U = string> =
-  | T
-  | (U & Record<never, never>);
-
-/**
  * Options for the sign-in flow.
  *
  * @public
