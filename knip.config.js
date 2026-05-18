@@ -1,4 +1,12 @@
 module.exports = {
+  ignore: [
+    'commitlint.config.js',
+    'dist/**',
+    'build/**',
+    'src/components/index.d.ts',
+    'typedoc.config.mjs',
+    'playground/**',
+  ],
   ignoreDependencies: [
     '@commitlint/config-conventional',
     '@semantic-release/.*?',
@@ -8,12 +16,4 @@ module.exports = {
   ],
   ignoreBinaries: ['typedoc'],
   entry: ['src/api/**/*.ts'],
-  ignore: [
-    'commitlint.config.js',
-    'dist/**',
-    'build/**',
-    'src/components/index.d.ts',
-    'typedoc.config.mjs',
-    'playground/**',
-  ],
 };

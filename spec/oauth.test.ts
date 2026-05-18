@@ -53,6 +53,7 @@ test.beforeAll(
         OAUTH_CLIENT_SECRET: 'test-secret',
       },
       detached: true,
+      shell: true,
       stdio: 'pipe',
     });
 
