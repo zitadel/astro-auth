@@ -9,7 +9,7 @@ const session = await getSession(Astro.request, authConfig);
 
 if (!session) {
   return Astro.redirect(
-    '/api/auth/signin?callbackUrl=' + encodeURIComponent('/profile'),
+    '/auth/login?callbackUrl=' + encodeURIComponent('/profile'),
   );
 }
 ---
