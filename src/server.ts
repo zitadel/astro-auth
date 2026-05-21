@@ -73,6 +73,36 @@ export function AstroAuth(options = authConfig) {
   const { prefix = '/api/auth', ...authOptions } = config;
 
   const handler = AstroAuthHandler(prefix, authOptions);
+
+  function defaultBasePath(): string {
+    return (prefix ?? '/api/auth').replace(/\/$/, '');
+  }
+
+  async function signIn(
+    provider?: string,
+    options: { redirectTo?: string } = {},
+  ): Promise<Response> {
+    const basePath = defaultBasePath();
+    const params = new URLSearchParams();
+    if (options.redirectTo) params.set('callbackUrl', options.redirectTo);
+    const paramStr = params.toString();
+    const url = provider
+      ? `${basePath}/signin/${provider}${paramStr ? `?${paramStr}` : ''}`
+      : `${basePath}/signin${paramStr ? `?${paramStr}` : ''}`;
+    return Response.redirect(url, 302);
+  }
+
+  async function signOut(
+    options: { redirectTo?: string } = {},
+  ): Promise<Response> {
+    const basePath = defaultBasePath();
+    const params = new URLSearchParams();
+    if (options.redirectTo) params.set('callbackUrl', options.redirectTo);
+    const paramStr = params.toString();
+    const url = `${basePath}/signout${paramStr ? `?${paramStr}` : ''}`;
+    return Response.redirect(url, 302);
+  }
+
   return {
     async GET(context: APIContext) {
       return await handler(context);
@@ -80,6 +110,8 @@ export function AstroAuth(options = authConfig) {
     async POST(context: APIContext) {
       return await handler(context);
     },
+    signIn,
+    signOut,
   };
 }
 
