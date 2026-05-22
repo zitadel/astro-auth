@@ -78,29 +78,61 @@ export function AstroAuth(options = authConfig) {
     return (prefix ?? '/api/auth').replace(/\/$/, '');
   }
 
-  async function signIn(
-    provider?: string,
-    options: { redirectTo?: string } = {},
-  ): Promise<Response> {
+  /**
+   * Returns the relative URL of the sign-in endpoint, with `callbackUrl`
+   * appended when `redirectTo` is provided. Useful when the framework's
+   * native redirect helper takes a URL string (e.g. `Astro.redirect(url)`).
+   */
+  function signInUrl(options: { redirectTo?: string } = {}): string {
     const basePath = defaultBasePath();
     const params = new URLSearchParams();
     if (options.redirectTo) params.set('callbackUrl', options.redirectTo);
     const paramStr = params.toString();
-    const url = provider
-      ? `${basePath}/signin/${provider}${paramStr ? `?${paramStr}` : ''}`
-      : `${basePath}/signin${paramStr ? `?${paramStr}` : ''}`;
-    return Response.redirect(url, 302);
+    return `${basePath}/signin${paramStr ? `?${paramStr}` : ''}`;
+  }
+
+  /**
+   * Returns the relative URL of the sign-out endpoint, with `callbackUrl`
+   * appended when `redirectTo` is provided.
+   */
+  function signOutUrl(options: { redirectTo?: string } = {}): string {
+    const basePath = defaultBasePath();
+    const params = new URLSearchParams();
+    if (options.redirectTo) params.set('callbackUrl', options.redirectTo);
+    const paramStr = params.toString();
+    return `${basePath}/signout${paramStr ? `?${paramStr}` : ''}`;
+  }
+
+  async function signIn(
+    provider?: string,
+    options: { redirectTo?: string } = {},
+  ): Promise<Response> {
+    // The `provider` argument is intentionally ignored on the server side:
+    // Auth.js's per-provider sign-in endpoint (/api/auth/signin/{provider})
+    // requires a POST with a CSRF token, which a 302 redirect cannot
+    // produce. Server-side signIn always routes through the chooser
+    // (/api/auth/signin); when `pages.signIn` is configured, Auth.js then
+    // bounces to the consumer's custom sign-in page (where the POST form
+    // + CSRF live). The `provider` arg is kept in the signature for
+    // parity with client-side signIn() callers.
+    void provider;
+    // Use a raw Response rather than Response.redirect(): the static
+    // Response.redirect() method validates the URL and rejects relative
+    // ones, but we don't have the request origin in this scope. Browsers
+    // accept relative Location headers per RFC 7231 §7.1.2.
+    return new Response(null, {
+      status: 302,
+      headers: { Location: signInUrl(options) },
+    });
   }
 
   async function signOut(
     options: { redirectTo?: string } = {},
   ): Promise<Response> {
-    const basePath = defaultBasePath();
-    const params = new URLSearchParams();
-    if (options.redirectTo) params.set('callbackUrl', options.redirectTo);
-    const paramStr = params.toString();
-    const url = `${basePath}/signout${paramStr ? `?${paramStr}` : ''}`;
-    return Response.redirect(url, 302);
+    return new Response(null, {
+      status: 302,
+      headers: { Location: signOutUrl(options) },
+    });
   }
 
   return {
@@ -111,8 +143,73 @@ export function AstroAuth(options = authConfig) {
       return await handler(context);
     },
     signIn,
+    signInUrl,
     signOut,
+    signOutUrl,
   };
+}
+
+/**
+ * Module-level URL/Response helpers that mirror the factory-returned ones.
+ *
+ * Provided so Astro pages can import them directly from
+ * `@zitadel/astro-auth/server` without needing access to the `AstroAuth()`
+ * closure (which lives inside the `[...auth]` route file). These use the
+ * default basePath `/api/auth` — matching the default the auth integration
+ * mounts at. Users who configure the integration with a custom prefix
+ * should call the factory-returned versions from their route file.
+ */
+const DEFAULT_BASE_PATH = '/api/auth';
+
+/**
+ * Returns the relative URL of the sign-in endpoint at the default
+ * basePath `/api/auth`, with `callbackUrl` appended when `redirectTo`
+ * is provided. Useful for `Astro.redirect(signInUrl({ redirectTo: ... }))`.
+ */
+export function signInUrl(options: { redirectTo?: string } = {}): string {
+  const params = new URLSearchParams();
+  if (options.redirectTo) params.set('callbackUrl', options.redirectTo);
+  const paramStr = params.toString();
+  return `${DEFAULT_BASE_PATH}/signin${paramStr ? `?${paramStr}` : ''}`;
+}
+
+/**
+ * Returns the relative URL of the sign-out endpoint at the default
+ * basePath `/api/auth`, with `callbackUrl` appended when `redirectTo`
+ * is provided.
+ */
+export function signOutUrl(options: { redirectTo?: string } = {}): string {
+  const params = new URLSearchParams();
+  if (options.redirectTo) params.set('callbackUrl', options.redirectTo);
+  const paramStr = params.toString();
+  return `${DEFAULT_BASE_PATH}/signout${paramStr ? `?${paramStr}` : ''}`;
+}
+
+/**
+ * Returns a 302 Response with `Location` pointing at the sign-in
+ * endpoint. Useful for `return signIn({ redirectTo: '/profile' })` from
+ * an Astro page's frontmatter when the page is unauthenticated.
+ */
+export async function signIn(
+  options: { redirectTo?: string } = {},
+): Promise<Response> {
+  return new Response(null, {
+    status: 302,
+    headers: { Location: signInUrl(options) },
+  });
+}
+
+/**
+ * Returns a 302 Response with `Location` pointing at the sign-out
+ * endpoint.
+ */
+export async function signOut(
+  options: { redirectTo?: string } = {},
+): Promise<Response> {
+  return new Response(null, {
+    status: 302,
+    headers: { Location: signOutUrl(options) },
+  });
 }
 
 /**
