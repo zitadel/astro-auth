@@ -135,13 +135,31 @@ export function AstroAuth(options = authConfig) {
     });
   }
 
+  async function GET(context: APIContext) {
+    return await handler(context);
+  }
+  async function POST(context: APIContext) {
+    return await handler(context);
+  }
+
+  /**
+   * Bound to the factory's config closure so callers don't need to pass
+   * `authConfig` explicitly. Matches the canonical factory return shape
+   * used by next-auth / remix-auth / solidstart-auth / tanstack-auth.
+   */
+  async function getSessionBound(req: Request): Promise<Session | null> {
+    return getSession(req, config as AstroAuthConfig);
+  }
+
   return {
-    async GET(context: APIContext) {
-      return await handler(context);
-    },
-    async POST(context: APIContext) {
-      return await handler(context);
-    },
+    // `handlers` alias so users can destructure the same way as in
+    // next-auth / remix-auth / solidstart-auth / tanstack-auth, while
+    // top-level GET/POST remain for the existing `export const { GET, POST }`
+    // pattern. Both forms share the same handler implementations.
+    handlers: { GET, POST },
+    GET,
+    POST,
+    getSession: getSessionBound,
     signIn,
     signInUrl,
     signOut,
