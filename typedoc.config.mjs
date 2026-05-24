@@ -2,6 +2,13 @@
 export default {
   entryPoints: ['src/index.ts'],
   out: '.out/docs',
+  readme: 'README.md',
+  projectDocuments: [
+    'docs/guide/getting-started/introduction.md',
+    'docs/guide/authjs/quick-start.md',
+    'docs/guide/application-side/configuration.md',
+    'docs/guide/advanced/caching.md',
+  ],
   highlightLanguages: [
     'typescript',
     'javascript',
