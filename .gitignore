@@ -8,6 +8,12 @@ build/
 out/
 *.tsbuildinfo
 
+# Typedoc generated output
+docs/
+
+# Astro generated cache (per-directory)
+.astro/
+
 # Environment configuration files
 .env
 .env.local
