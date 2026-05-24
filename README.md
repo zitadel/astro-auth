@@ -232,7 +232,7 @@ export default defineConfig({
   the Auth.js user object, extend your app’s types accordingly so consumers of
   `session.user` remain type-safe.
 - **Redirect Semantics:** OAuth providers expect real browser navigations during
-  sign-in. The client helpers handle this for you—avoid manual `fetch()` calls
+  sign-in. The client helpers handle this for you — avoid manual `fetch()` calls
   to provider endpoints unless you know you need credential/email flows.
 
 ## Useful links
