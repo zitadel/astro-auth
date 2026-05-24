@@ -9,9 +9,6 @@ module.exports = {
     'commitlint.config.js',
     'src/components/index.d.ts',
     'typedoc.config.mjs',
-    'dist/**',
-    'build/**',
-    'docs/**',
     'playground/**',
   ],
 };

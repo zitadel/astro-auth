@@ -53,7 +53,8 @@
     "format:check": "prettier --check .",
     "lint": "npx eslint .",
     "lint:fix": "npx eslint . --fix",
-    "depcheck": "npx knip"
+    "depcheck": "npx knip",
+    "docs": "typedoc"
   },
   "peerDependencies": {
     "@auth/core": ">=0.40.0",
@@ -85,6 +86,7 @@
     "semantic-release": "^25.0.3",
     "ts-jest": "29.4.0",
     "tsup": "^8.5.0",
+    "typedoc": "^0.28.7",
     "typescript": "^5.9.3"
   },
   "keywords": [
