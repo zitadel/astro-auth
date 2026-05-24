@@ -2,6 +2,7 @@
 export default {
   entryPoints: ['src/index.ts'],
   out: '.out/docs',
+  tsconfig: './tsconfig.json',
   readme: 'README.md',
   projectDocuments: [
     'docs/guide/getting-started/introduction.md',

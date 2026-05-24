@@ -1,5 +1,5 @@
 ---
-title: Server-Side Session Access
+title: Session Access
 group: Auth.js Provider
 category: Server Side
 ---

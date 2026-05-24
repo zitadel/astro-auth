@@ -1,5 +1,5 @@
 ---
-title: Session Access (client)
+title: Session Access
 group: Application Side
 ---
 

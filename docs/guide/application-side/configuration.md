@@ -1,6 +1,9 @@
 ---
 title: Configuration
 group: Application Side
+children:
+  - ./protecting-pages.md
+  - ./session-access.md
 ---
 
 # Factory Configuration
