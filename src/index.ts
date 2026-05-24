@@ -10,7 +10,7 @@
  * ```js
  * // astro.config.mjs
  * import { defineConfig } from 'astro/config'
- * import authAstro from 'astro-auth'
+ * import authAstro from '@zitadel/astro-auth'
  *
  * export default defineConfig({
  *   output: 'server',
@@ -21,7 +21,7 @@
  * @example With Configuration
  * ```js
  * // astro.config.mjs
- * import authAstro from 'astro-auth'
+ * import authAstro from '@zitadel/astro-auth'
  *
  * export default defineConfig({
  *   integrations: [
@@ -36,7 +36,7 @@
  * @example Creating Auth Configuration
  * ```ts
  * // auth.config.ts
- * import { defineConfig } from 'astro-auth'
+ * import { defineConfig } from '@zitadel/astro-auth'
  * import GitHub from '@auth/core/providers/github'
  *
  * export default defineConfig({
@@ -53,7 +53,7 @@
  * @example Using Components
  * ```astro
  * ---
- * import { SignIn, SignOut, Auth } from 'astro-auth'
+ * import { SignIn, SignOut, Auth } from '@zitadel/astro-auth'
  * ---
  *
  * <Auth>
@@ -74,3 +74,11 @@ export { default } from './integration.js';
 export { defineConfig } from './config.js';
 export type { FullAuthConfig } from './config.js';
 export type { AuthEnvVars, AstroIntegrationOptions } from './config.js';
+export { AuthError, CredentialsSignin } from '@auth/core/errors';
+export type {
+  Account,
+  DefaultSession,
+  Profile,
+  Session,
+  User,
+} from '@auth/core/types';

@@ -52,9 +52,7 @@ export interface AstroIntegrationOptions {
  *
  * @public
  */
-export interface FullAuthConfig
-  extends AstroIntegrationOptions,
-    Omit<AuthConfig, 'raw'> {}
+export type FullAuthConfig = AstroIntegrationOptions & Omit<AuthConfig, 'raw'>;
 
 /**
  * Environment variables structure used by Auth.js configuration.
@@ -168,14 +166,14 @@ const parseBool = (value?: string): boolean => {
  *
  * @example
  * ```ts
- * import { defineConfig } from 'astro-auth'
- * import GitHub from '@auth/core/providers/github'
+ * import { defineConfig } from '@zitadel/astro-auth'
+ * import Zitadel from '@auth/core/providers/zitadel'
  *
  * export default defineConfig({
  *   providers: [
- *     GitHub({
- *       clientId: process.env.GITHUB_ID,
- *       clientSecret: process.env.GITHUB_SECRET
+ *     Zitadel({
+ *       clientId: process.env.ZITADEL_CLIENT_ID,
+ *       clientSecret: process.env.ZITADEL_CLIENT_SECRET
  *     })
  *   ],
  *   secret: process.env.AUTH_SECRET
