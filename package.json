@@ -21,6 +21,9 @@
     "./components": {
       "types": "./dist/components/index.d.ts",
       "import": "./dist/components/index.js"
+    },
+    "./adapters": {
+      "types": "./dist/adapter.d.ts"
     }
   },
   "files": [
