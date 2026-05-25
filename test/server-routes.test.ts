@@ -1,5 +1,6 @@
 import { describe, expect, it, beforeAll, afterAll, jest } from '@jest/globals';
-import { spawn, type ChildProcess } from 'child_process';
+import { execSync, spawn, type ChildProcess } from 'child_process';
+import { existsSync } from 'node:fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -88,6 +89,17 @@ beforeAll(async () => {
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
   const playgroundDir = path.resolve(__dirname, '../playground');
 
+  // Ensure playground dependencies are installed. Root `npm ci` does NOT
+  // cascade into the playground (it's not a workspace), so in CI / fresh
+  // checkouts the playground's `node_modules` is missing. Without it,
+  // `npm run dev` below would fail to find the framework binary and the
+  // readiness poll would hang for the full timeout.
+  if (!existsSync(path.join(playgroundDir, 'node_modules'))) {
+    execSync('npm ci --no-progress --no-audit --no-fund', {
+      cwd: playgroundDir,
+      stdio: 'inherit',
+    });
+  }
   devServer = spawn('npm', ['run', 'dev'], {
     cwd: playgroundDir,
     env: {
