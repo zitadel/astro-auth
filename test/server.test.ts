@@ -164,9 +164,7 @@ describe('server', () => {
       const { getSession } = await import('../src/server.js');
       await expect(
         getSession(new Request('http://x.local/'), makeCfg()),
-      ).rejects.toThrow(
-        '[astro-auth] getSession failed: 500 {"message":"boom"}',
-      );
+      ).rejects.toThrow('boom');
     });
 
     it('forwards incoming cookies to Auth', async () => {

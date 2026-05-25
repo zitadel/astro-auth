@@ -73,9 +73,6 @@ Thumbs.db
 # Jest coverage
 .out
 
-# TypeDoc output
-docs
-
 # Github Keys
 *.pem
 .devbox/

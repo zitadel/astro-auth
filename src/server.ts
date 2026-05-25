@@ -160,6 +160,8 @@ export function AstroAuth(options = authConfig) {
     GET,
     POST,
     getSession: getSessionBound,
+    /** @deprecated use `getSession` instead */
+    auth: getSessionBound,
     signIn,
     signInUrl,
     signOut,
@@ -302,7 +304,7 @@ export async function getSession(
       return data as unknown as Session;
     } else {
       throw new Error(
-        `[astro-auth] getSession failed: ${status} ${JSON.stringify(data)}`,
+        (data as { message?: string }).message ?? 'Session error',
       );
     }
   }
