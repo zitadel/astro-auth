@@ -19,7 +19,7 @@ features:
   - title: OAuth
     details: Effortlessly connect your Astro application with Google, GitHub, Azure and countless others.
   - title: Database Adapters
-    details: Persist user sessions and accounts with official AuthJS database adapters.
+    details: Persist user sessions and accounts with official database adapters for the auth library.
   - title: Middleware
     details: Easily define the authentication rules for all of your pages.
   - title: REST API

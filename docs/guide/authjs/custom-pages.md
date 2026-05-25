@@ -1,6 +1,6 @@
 ---
 title: Custom Pages
-group: Auth.js Provider
+group: OAuth Provider
 ---
 
 # Custom auth pages

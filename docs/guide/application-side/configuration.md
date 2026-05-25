@@ -9,7 +9,7 @@ children:
 # Factory Configuration
 
 The SDK's factory accepts an `AuthConfig` from `@auth/core`. The full
-shape is documented in the [Auth.js
+shape is documented in the [OAuth
 reference](https://authjs.dev/reference/core). The most-used keys are
 below.
 
@@ -47,7 +47,7 @@ providers: [
 
 - **Type**: `{ signIn?: string; signOut?: string; error?: string; ... }`
 
-Override the default Auth.js pages with your own routes:
+Override the default OAuth pages with your own routes:
 
 ```ts
 pages: {
@@ -80,7 +80,7 @@ common `jwt` + `session` callback patterns.
 
 - **Type**: `boolean`
 
-If `true`, Auth.js trusts `X-Forwarded-Host` / `Host` headers when computing
+If `true`, OAuth trusts `X-Forwarded-Host` / `Host` headers when computing
 URLs. Only enable when your hosting platform's proxy headers are
 trustworthy.
 

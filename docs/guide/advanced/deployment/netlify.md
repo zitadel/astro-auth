@@ -39,5 +39,5 @@ AUTH_URL=${URL}
 > redirect/callback URL, or at least a set of full static URLs. Meaning you
 > cannot set the value before publishing the site and you cannot use wildcard
 > subdomains in the callback URL settings of your OAuth provider. To avoid
-> this, Auth.js has a few suggestions you can find
+> this, OAuth has a few suggestions you can find
 > [here](https://authjs.dev/getting-started/deployment).

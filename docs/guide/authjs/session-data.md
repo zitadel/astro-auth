@@ -1,11 +1,11 @@
 ---
 title: Session Data
-group: Auth.js Provider
+group: OAuth Provider
 ---
 
 # Customizing session data
 
-Auth.js gives you two callbacks for shaping what ends up in the session:
+OAuth gives you two callbacks for shaping what ends up in the session:
 `jwt` and `session`. They're framework-agnostic — the SDK exposes them
 through the auth config you pass to the factory.
 

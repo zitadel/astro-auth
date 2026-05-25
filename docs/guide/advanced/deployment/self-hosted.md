@@ -9,9 +9,9 @@ category: Deployment
 This guide explains how you can self-host a Astro application running
 `@zitadel/astro-auth`.
 
-## Auth.js Provider
+## OAuth Provider
 
-When deploying the Auth.js provider, the application must be informed what
+When deploying the OAuth provider, the application must be informed what
 URL it is running at. This is to properly determine callback URLs when
 navigating users to external OAuth providers.
 

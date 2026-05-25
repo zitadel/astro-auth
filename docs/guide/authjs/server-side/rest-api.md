@@ -1,12 +1,12 @@
 ---
 title: REST API
-group: Auth.js Provider
+group: OAuth Provider
 category: Server Side
 ---
 
 # REST API
 
-The mounted auth handler exposes the Auth.js REST endpoints under the
+The mounted auth handler exposes the OAuth REST endpoints under the
 configured basePath (default `/api/auth`):
 
 | Method | Path                     | Purpose                                       |

@@ -9,7 +9,7 @@ children:
 
 `@zitadel/astro-auth` is an open source Astro integration that provides
 authentication for Astro applications. It wraps
-[Auth.js](https://authjs.dev/) (`@auth/core`) to bring OAuth, credentials, and
+auth (`@auth/core`) to bring OAuth, credentials, and
 magic-link authentication to Astro with a native developer experience.
 
 Through a direct integration as an Astro integration, you can access and

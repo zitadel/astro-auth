@@ -1,6 +1,6 @@
 ---
 title: AstroAuth Factory
-group: Auth.js Provider
+group: OAuth Provider
 ---
 
 # AstroAuth Factory
