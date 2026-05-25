@@ -78,7 +78,7 @@ attrs.class = `signin-button ${attrs.class ?? ''}`;
               ? JSON.parse(button.dataset.signinOptions)
               : undefined;
           } catch (e) {
-            console.warn('[astro-auth] Invalid signin options JSON:', e);
+            console.warn('Invalid signin options JSON:', e);
             options = undefined;
           }
 
@@ -87,7 +87,7 @@ attrs.class = `signin-button ${attrs.class ?? ''}`;
               ? JSON.parse(button.dataset.signinAuthParams)
               : undefined;
           } catch (e) {
-            console.warn('[astro-auth] Invalid signin authParams JSON:', e);
+            console.warn('Invalid signin authParams JSON:', e);
             authParams = undefined;
           }
 

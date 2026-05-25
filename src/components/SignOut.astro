@@ -53,7 +53,7 @@ attrs.class = `signout-button ${attrs.class ?? ''}`;
               ? JSON.parse(button.dataset.signoutParams)
               : undefined;
           } catch (e) {
-            console.warn('[astro-auth] Invalid signout params JSON:', e);
+            console.warn('Invalid signout params JSON:', e);
             params = undefined;
           }
 
