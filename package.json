@@ -64,7 +64,6 @@
     "astro": ">=5.0.0"
   },
   "devDependencies": {
-    "@auth/core": "^0.40.0",
     "@commitlint/config-conventional": "^20.5.0",
     "@jest/globals": "^30.0.5",
     "@mridang/eslint-defaults": "^1.6.1",
