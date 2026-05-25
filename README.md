@@ -41,7 +41,7 @@ effective and less burdensome authentication implementation.
 Install using NPM by using the following command:
 
 ```sh
-npm install @zitadel/astro-auth @auth/core
+npm install @zitadel/astro-auth
 ```
 
 ## Usage

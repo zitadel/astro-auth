@@ -61,7 +61,6 @@
     "docs": "typedoc"
   },
   "peerDependencies": {
-    "@auth/core": ">=0.40.0",
     "astro": ">=5.0.0"
   },
   "devDependencies": {
@@ -114,5 +113,8 @@
   "bugs": "https://github.com/zitadel/astro-auth/issues",
   "publishConfig": {
     "access": "public"
+  },
+  "dependencies": {
+    "@auth/core": "^0.40.0"
   }
 }
