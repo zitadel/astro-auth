@@ -1,6 +1,6 @@
 {
   "name": "@zitadel/astro-auth",
-  "description": "A comprehensive Auth.js integration for Astro applications with TypeScript support, framework-agnostic HTTP adapters, and role-based access control",
+  "description": "A comprehensive authentication integration for Astro applications with TypeScript support, framework-agnostic HTTP adapters, and role-based access control",
   "version": "0.1.0",
   "type": "module",
   "main": "dist/index.js",
@@ -94,19 +94,19 @@
     "testcontainers": "^12.0.0"
   },
   "keywords": [
-    "astro",
     "auth",
     "authentication",
-    "integration",
-    "@auth",
-    "@auth/core",
+    "authorization",
+    "authn",
+    "authz",
+    "oauth",
+    "oidc",
     "authjs",
     "jwt",
-    "oauth",
-    "astro-auth",
-    "astro-integration",
-    "astro-component",
-    "withastro"
+    "jwks",
+    "pkce",
+    "astro",
+    "astro-integration"
   ],
   "private": false,
   "homepage": "https://github.com/zitadel/astro-auth",
