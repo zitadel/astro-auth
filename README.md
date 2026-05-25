@@ -28,9 +28,9 @@ of applications or deployment scenarios might warrant different approaches:
 - **Session and Request Lifecycle:** Proper session handling in Astro requires
   SSR-friendly utilities and components that work across server-rendered pages
   and client interactions.
-- **Route Protection & UI:** Many applications need fine-grained authorization
-  beyond simple authentication. This calls for cohesive building blocks: server utilities,
-  client helpers, and drop-in UI components.
+- **Route Protection:** Many applications need fine-grained authorization
+  beyond simple authentication. This integration provides server utilities,
+  client helpers, and drop-in UI components for protecting pages and APIs.
 
 This integration, `@zitadel/astro-auth`, aims to provide the flexibility to
 handle such scenarios. It allows you to leverage the full Auth.js ecosystem
@@ -77,13 +77,14 @@ export default defineConfig({
 ```ts
 // auth.config.ts
 import { defineConfig } from '@zitadel/astro-auth';
-import Google from '@auth/core/providers/google';
+import Zitadel from '@auth/core/providers/zitadel';
 
 export default defineConfig({
   providers: [
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    Zitadel({
+      clientId: process.env.ZITADEL_CLIENT_ID,
+      clientSecret: process.env.ZITADEL_CLIENT_SECRET,
+      issuer: process.env.ZITADEL_DOMAIN,
     }),
   ],
   secret: process.env.AUTH_SECRET,
@@ -96,7 +97,7 @@ export default defineConfig({
 The integration provides several functions and hooks for handling
 authentication:
 
-**Functions and Hooks:**
+**Server Utilities:**
 
 - `getSession(request, config?)`: Retrieves the current Auth.js session (SSR)
 - `<Auth>`: Render-prop component that provides the current session to children
