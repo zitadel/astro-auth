@@ -366,4 +366,113 @@ describe('server', () => {
       expect(spy).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('signIn URL construction', () => {
+    it('should redirect to /api/auth/signin when no provider given', async () => {
+      jest.unstable_mockModule('@auth/core', () => ({
+        Auth: jest.fn(),
+        createActionURL: jest.fn().mockImplementation(mockCreateActionURL),
+        setEnvDefaults: jest.fn(),
+      }));
+      const { AstroAuth } = await import('../src/server.js');
+      const { signIn } = AstroAuth(makeCfg());
+
+      const response = await signIn();
+
+      expect(response.status).toBe(302);
+      expect(response.headers.get('location')).toBe('/api/auth/signin');
+    });
+
+    it('should redirect to /api/auth/signin when a provider is given (provider ignored server-side)', async () => {
+      jest.unstable_mockModule('@auth/core', () => ({
+        Auth: jest.fn(),
+        createActionURL: jest.fn().mockImplementation(mockCreateActionURL),
+        setEnvDefaults: jest.fn(),
+      }));
+      const { AstroAuth } = await import('../src/server.js');
+      const { signIn } = AstroAuth(makeCfg());
+
+      const response = await signIn('github');
+
+      expect(response.status).toBe(302);
+      expect(response.headers.get('location')).toBe('/api/auth/signin');
+    });
+
+    it('should append callbackUrl when redirectTo is provided', async () => {
+      jest.unstable_mockModule('@auth/core', () => ({
+        Auth: jest.fn(),
+        createActionURL: jest.fn().mockImplementation(mockCreateActionURL),
+        setEnvDefaults: jest.fn(),
+      }));
+      const { AstroAuth } = await import('../src/server.js');
+      const { signIn } = AstroAuth(makeCfg());
+
+      const response = await signIn(undefined, { redirectTo: '/profile' });
+      const location = response.headers.get('location') ?? '';
+
+      expect(response.status).toBe(302);
+      expect(location).toContain('/api/auth/signin');
+      expect(location).toContain('callbackUrl=%2Fprofile');
+    });
+
+    it('should expose signInUrl helper returning the same path', async () => {
+      jest.unstable_mockModule('@auth/core', () => ({
+        Auth: jest.fn(),
+        createActionURL: jest.fn().mockImplementation(mockCreateActionURL),
+        setEnvDefaults: jest.fn(),
+      }));
+      const { AstroAuth } = await import('../src/server.js');
+      const { signInUrl } = AstroAuth(makeCfg());
+
+      expect(signInUrl()).toBe('/api/auth/signin');
+      expect(signInUrl({ redirectTo: '/' })).toContain('callbackUrl=');
+    });
+  });
+
+  describe('signOut URL construction', () => {
+    it('should redirect to /api/auth/signout', async () => {
+      jest.unstable_mockModule('@auth/core', () => ({
+        Auth: jest.fn(),
+        createActionURL: jest.fn().mockImplementation(mockCreateActionURL),
+        setEnvDefaults: jest.fn(),
+      }));
+      const { AstroAuth } = await import('../src/server.js');
+      const { signOut } = AstroAuth(makeCfg());
+
+      const response = await signOut();
+
+      expect(response.status).toBe(302);
+      expect(response.headers.get('location')).toBe('/api/auth/signout');
+    });
+
+    it('should append callbackUrl when redirectTo is provided', async () => {
+      jest.unstable_mockModule('@auth/core', () => ({
+        Auth: jest.fn(),
+        createActionURL: jest.fn().mockImplementation(mockCreateActionURL),
+        setEnvDefaults: jest.fn(),
+      }));
+      const { AstroAuth } = await import('../src/server.js');
+      const { signOut } = AstroAuth(makeCfg());
+
+      const response = await signOut({ redirectTo: '/' });
+      const location = response.headers.get('location') ?? '';
+
+      expect(response.status).toBe(302);
+      expect(location).toContain('/api/auth/signout');
+      expect(location).toContain('callbackUrl=');
+    });
+
+    it('should expose signOutUrl helper returning the same path', async () => {
+      jest.unstable_mockModule('@auth/core', () => ({
+        Auth: jest.fn(),
+        createActionURL: jest.fn().mockImplementation(mockCreateActionURL),
+        setEnvDefaults: jest.fn(),
+      }));
+      const { AstroAuth } = await import('../src/server.js');
+      const { signOutUrl } = AstroAuth(makeCfg());
+
+      expect(signOutUrl()).toBe('/api/auth/signout');
+      expect(signOutUrl({ redirectTo: '/' })).toContain('callbackUrl=');
+    });
+  });
 });
