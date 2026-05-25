@@ -1,30 +1,29 @@
-# Astro Auth.js
+# Astro Auth
 
-An [Astro](https://astro.build/) integration for [Auth.js](https://authjs.dev/)
+An [Astro](https://astro.build/) integration for auth
 that provides seamless authentication with multiple providers, session
 management, and UI primitives that feel natural in Astro.
 
-This integration brings the power and flexibility of Auth.js to Astro
+This integration brings the power and flexibility of OAuth to Astro
 applications with full TypeScript support, SSR-friendly HTTP handling,
 and Astro-native patterns including integrations, endpoints, and components.
 
 ### Why?
 
 Modern web applications require robust, secure, and flexible authentication
-systems. While Auth.js provides excellent authentication capabilities,
-integrating it with Astro applications requires careful consideration of
+systems. Integrating OAuth and session management with Astro applications requires careful consideration of
 framework patterns, server-side rendering, and TypeScript integration.
 
 However, a direct integration isn't always straightforward. Different types
 of applications or deployment scenarios might warrant different approaches:
 
-- **Framework Integration:** Auth.js operates at the HTTP level, while Astro
+- **Framework Integration:** OAuth and auth flows operate at the HTTP level, while Astro
   uses integrations, endpoints, and components. A proper integration should bridge this
   gap by providing Astro-native primitives for authentication and authorization
-  while maintaining the full Auth.js ecosystem compatibility.
+  while maintaining the full OAuth provider ecosystem compatibility.
 - **HTTP Request Handling:** Astro’s server output and adapters (Node, Vercel, etc.)
   require clean request handling and route injection. Teams need a unified approach that
-  maintains performance while providing seamless Auth.js integration.
+  maintains performance while providing seamless OAuth integration.
 - **Session and Request Lifecycle:** Proper session handling in Astro requires
   SSR-friendly utilities and components that work across server-rendered pages
   and client interactions.
@@ -33,7 +32,7 @@ of applications or deployment scenarios might warrant different approaches:
   client helpers, and drop-in UI components for protecting pages and APIs.
 
 This integration, `@zitadel/astro-auth`, aims to provide the flexibility to
-handle such scenarios. It allows you to leverage the full Auth.js ecosystem
+handle such scenarios. It allows you to leverage the full OAuth provider ecosystem
 while maintaining Astro best practices, ultimately leading to a more
 effective and less burdensome authentication implementation.
 
@@ -51,7 +50,7 @@ To use this integration, add the `@zitadel/astro-auth` integration to your Astro
 The integration provides authentication infrastructure with configurable
 endpoints, SSR utilities, and components.
 
-You'll need to configure it with your Auth.js providers and options. The
+You'll need to configure it with your OAuth providers and options. The
 integration will then be available throughout your application via Astro’s
 integration system.
 
@@ -99,7 +98,7 @@ authentication:
 
 **Server Utilities:**
 
-- `getSession(request, config?)`: Retrieves the current Auth.js session (SSR)
+- `getSession(request, config?)`: Retrieves the current OAuth session (SSR)
 - `<Auth>`: Render-prop component that provides the current session to children
 - `<SignIn provider="...">`: Drop-in button component for starting sign-in
 - `<SignOut>`: Drop-in button component for signing out
@@ -178,7 +177,7 @@ Prefer client helpers? Use inline script tags:
 
 ##### Example: Advanced Configuration with Multiple Providers
 
-This example shows how to use the integration with multiple Auth.js
+This example shows how to use the integration with multiple OAuth
 providers and custom session configuration:
 
 ```ts
@@ -230,7 +229,7 @@ export default defineConfig({
 - **Callback URLs:** OAuth providers must be configured with the correct
   callback URL: `[origin]/api/auth/callback/[provider]` (or your custom `prefix`).
 - **Type Augmentation:** If you attach additional properties (e.g., roles) to
-  the Auth.js user object, extend your app’s types accordingly so consumers of
+  the user session object, extend your app’s types accordingly so consumers of
   `session.user` remain type-safe.
 - **Redirect Semantics:** OAuth providers expect real browser navigations during
   sign-in. The client helpers handle this for you — avoid manual `fetch()` calls
@@ -238,11 +237,7 @@ export default defineConfig({
 
 ## Useful links
 
-- **[Auth.js](https://authjs.dev/):** The authentication library that this
-  integration is built upon.
 - **[Astro](https://astro.build/):** The framework this integration targets.
-- **[Auth.js Providers](https://authjs.dev/getting-started/providers):**
-  Complete list of supported authentication providers.
 
 ## Contributing
 
