@@ -47,6 +47,7 @@
     "test": "npm run test:unit && npm run test:e2e",
     "test:unit": "jest --verbose --config=jest.config.mjs --runInBand --passWithNoTests",
     "test:watch": "npm run test:unit -- --watch",
+    "typecheck": "tsc --noEmit",
     "test:debug": "jest --verbose --config=jest.config.mjs --runInBand --detectOpenHandles",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
