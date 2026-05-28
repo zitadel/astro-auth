@@ -88,3 +88,4 @@ playground/.svelte-kit/
 playground/.astro/
 build/playwright/
 build/playwright-report/
+playground/package-lock.json
