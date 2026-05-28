@@ -22,7 +22,7 @@ import { fileURLToPath } from 'node:url';
 export default function globalSetup(): void {
   const here = dirname(fileURLToPath(import.meta.url));
   const playground = resolve(here, '..', 'playground');
-  execSync('npm ci --no-progress --no-audit --no-fund', {
+  execSync('npm install --no-progress --no-audit --no-fund', {
     cwd: playground,
     stdio: 'inherit',
   });
