@@ -30,6 +30,27 @@ async function signInWithOAuth(page: Page): Promise<void> {
   await page.waitForURL(/\/profile/, { timeout: 30_000 });
 }
 
+/**
+ * Drives the login flow from the home page's client `signIn('mock-oidc')`
+ * button. Because the helper performs a CSRF-protected POST straight to
+ * `/api/auth/signin/mock-oidc`, the browser lands directly on the Mock OIDC
+ * username form — there is no Auth.js provider chooser to click through. This
+ * is the path that regressed to the Configuration error before the fix.
+ *
+ * @param page - The Playwright Page instance
+ * @returns Resolves once the browser has navigated to /profile
+ */
+async function signInWithClientHelper(page: Page): Promise<void> {
+  // Wait for hydration: the button calls the client `signIn` helper, so its
+  // click handler is only wired once the page's JavaScript has loaded.
+  await page.goto('/', { waitUntil: 'networkidle' });
+  await page.click('[data-testid="signin-oauth"]');
+  await page.waitForSelector('input[name="username"]', { timeout: 30_000 });
+  await page.fill('input[name="username"]', 'testuser');
+  await page.locator('[type="submit"]').first().click();
+  await page.waitForURL(/\/profile/, { timeout: 30_000 });
+}
+
 test.beforeAll(
   async () => {
     container = await new GenericContainer(
@@ -95,39 +116,41 @@ test.afterAll(async () => {
 
 test('homepage shows unauthenticated state', async ({ page }) => {
   await page.goto('/');
+  await expect(page.locator('[data-testid="signin-oauth"]')).toBeVisible();
+  await expect(page.locator('[data-testid="signin-default"]')).toBeVisible();
   await expect(
     page.locator('[data-testid="signin-credentials"]'),
   ).toBeVisible();
-  await expect(page.locator('[data-testid="signin-oauth"]')).toBeVisible();
 });
 
-test('OAuth sign-in via signin-oauth button', async ({ page }) => {
-  await page.goto('/');
-  await page.click('[data-testid="signin-oauth"]');
-  // Auth.js renders a provider confirmation page for GET /signin/:provider;
-  // click through it to initiate the actual OAuth flow.
-  await page.waitForSelector('text=Mock OIDC', { timeout: 15_000 });
-  await page.click('text=Mock OIDC');
-  await page.waitForSelector('input[name="username"]', { timeout: 15_000 });
-  await page.fill('input[name="username"]', 'testuser');
-  await page.locator('[type="submit"]').first().click();
-  await page.waitForURL(/\/profile/, { timeout: 30_000 });
+// Side path: the home page's client `signIn('mock-oidc')` button. This
+// exercises the SDK client helper end-to-end — the path that previously threw
+// a Configuration error because the helper issued a GET instead of a POST.
+test('OAuth sign-in via home client-helper button', async ({ page }) => {
+  await signInWithClientHelper(page);
+  await expect(page).toHaveURL(/\/profile/);
   await expect(page.locator('[data-testid="signout-button"]')).toBeVisible();
 });
 
+// Direct route: the Auth.js-rendered provider chooser at /api/auth/signin.
 test('full OAuth flow via Auth.js sign-in page', async ({ page }) => {
   await signInWithOAuth(page);
   await expect(page).toHaveURL(/\/profile/);
 });
 
-test('full sign-in and sign-out cycle', async ({ page }) => {
-  await signInWithOAuth(page);
-  await page.goto('/');
+// Logout component: the one-click client `signOut()` button on the profile
+// page clears the session and returns to the unauthenticated home page.
+test('sign-out via logout component', async ({ page }) => {
+  await signInWithClientHelper(page);
+  // Wait for hydration so the one-click signOut handler is wired.
+  await page.waitForLoadState('networkidle');
   await page.click('[data-testid="signout-button"]');
-  await page.locator('button[type="submit"]').click();
-  await page.waitForURL((url) => !url.pathname.startsWith('/api/auth/'), {
-    timeout: 10_000,
+  // signOut clears the session, so the protected profile page is no longer
+  // reachable (the app bounces unauthenticated users away from it).
+  await page.waitForURL((url) => !url.pathname.startsWith('/profile'), {
+    timeout: 30_000,
   });
+  await page.goto('/');
   await expect(
     page.locator('[data-testid="signin-credentials"]'),
   ).toBeVisible();
