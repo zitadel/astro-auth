@@ -15,8 +15,11 @@ async function signInWithCredentials(page: Page): Promise<void> {
 }
 
 async function signOutUser(page: Page): Promise<void> {
+  // The logout control is now a one-click client `signOut()` button: it posts
+  // to /api/auth/signout directly, with no interstitial confirmation page.
+  // Wait for hydration so the click handler is wired before we click.
+  await page.waitForLoadState('networkidle');
   await page.click('[data-testid="signout-button"]');
-  await page.locator('button[type="submit"]').click();
   await page.waitForURL((url) => !url.pathname.startsWith('/api/auth/'), {
     timeout: 10_000,
   });

@@ -1,128 +1,177 @@
 import { describe, expect, it, beforeEach, afterEach } from '@jest/globals';
 
-// The client module uses `window.location.href` at call time (not load time),
-// so we can mock the global `window` object in Node.js without jsdom.
-let locationHref = '';
+// The client helpers run only in the browser: they fetch a CSRF token and
+// submit a hidden POST form (Auth.js v5 rejects a plain GET to its action
+// endpoints). The test environment is Node, so we stub the minimal `fetch`
+// and `document` surface they touch and assert on the form that gets built
+// and submitted — the behavior, not a hard-coded URL string.
+
+interface FakeInput {
+  type: string;
+  name: string;
+  value: string;
+}
+
+interface FakeForm {
+  method: string;
+  action: string;
+  readonly fields: FakeInput[];
+  appendChild: (input: FakeInput) => void;
+  submit: () => void;
+}
+
+let lastForm: FakeForm | null;
+let submitCount: number;
+const fetchCalls: string[] = [];
 
 beforeEach(() => {
-  locationHref = '';
-  (globalThis as Record<string, unknown>).window = {
-    location: {
-      get href() {
-        return locationHref;
-      },
-      set href(url: string) {
-        locationHref = url;
+  lastForm = null;
+  submitCount = 0;
+  fetchCalls.length = 0;
+
+  const fetchStub = (
+    input: string,
+  ): Promise<{ json: () => Promise<unknown> }> => {
+    fetchCalls.push(input);
+    return Promise.resolve({
+      json: () => Promise.resolve({ csrfToken: 'test-csrf-token' }),
+    });
+  };
+
+  const documentStub = {
+    createElement(tag: string): FakeForm | FakeInput {
+      if (tag === 'form') {
+        const fields: FakeInput[] = [];
+        const form: FakeForm = {
+          method: '',
+          action: '',
+          fields,
+          appendChild(input: FakeInput) {
+            fields.push(input);
+          },
+          submit() {
+            submitCount += 1;
+          },
+        };
+        lastForm = form;
+        return form;
+      }
+      return { type: '', name: '', value: '' };
+    },
+    body: {
+      appendChild() {
+        // no-op: the form is tracked via `lastForm`
       },
     },
   };
+
+  (globalThis as Record<string, unknown>).fetch = fetchStub;
+  (globalThis as Record<string, unknown>).document = documentStub;
 });
 
 afterEach(() => {
-  delete (globalThis as Record<string, unknown>).window;
+  delete (globalThis as Record<string, unknown>).fetch;
+  delete (globalThis as Record<string, unknown>).document;
 });
+
+function fieldsOf(form: FakeForm): Record<string, string> {
+  return Object.fromEntries(form.fields.map((f) => [f.name, f.value]));
+}
 
 describe('Auth Client', () => {
   describe('signIn', () => {
-    it('should set window.location.href to /api/auth/signin/{provider} when provider is given', async () => {
+    it('fetches the CSRF token before submitting', async () => {
       const { signIn } = await import('../src/client.js');
 
       await signIn('zitadel');
 
-      expect(locationHref).toBe('/api/auth/signin/zitadel');
+      expect(fetchCalls).toContain('/api/auth/csrf');
     });
 
-    it('should set window.location.href to /api/auth/signin when no provider is given', async () => {
+    it('submits a POST form to /api/auth/signin/{provider} when a provider is given', async () => {
+      const { signIn } = await import('../src/client.js');
+
+      await signIn('zitadel');
+
+      expect(lastForm).not.toBeNull();
+      expect(lastForm?.method).toBe('POST');
+      expect(lastForm?.action).toBe('/api/auth/signin/zitadel');
+      expect(submitCount).toBe(1);
+    });
+
+    it('includes the CSRF token as a hidden field', async () => {
+      const { signIn } = await import('../src/client.js');
+
+      await signIn('zitadel');
+
+      expect(fieldsOf(lastForm!).csrfToken).toBe('test-csrf-token');
+    });
+
+    it('posts to /api/auth/signin when no provider is given', async () => {
       const { signIn } = await import('../src/client.js');
 
       await signIn();
 
-      expect(locationHref).toBe('/api/auth/signin');
+      expect(lastForm?.action).toBe('/api/auth/signin');
+      expect(submitCount).toBe(1);
     });
 
-    it('should append callbackUrl as encoded query param when callbackUrl is provided with a provider', async () => {
+    it('includes callbackUrl as a hidden field when provided', async () => {
       const { signIn } = await import('../src/client.js');
 
       await signIn('zitadel', { callbackUrl: '/dashboard' });
 
-      expect(locationHref).toBe(
-        '/api/auth/signin/zitadel?callbackUrl=%2Fdashboard',
-      );
+      expect(fieldsOf(lastForm!).callbackUrl).toBe('/dashboard');
     });
 
-    it('should append callbackUrl when no provider is given', async () => {
+    it('omits callbackUrl when not provided', async () => {
       const { signIn } = await import('../src/client.js');
 
-      await signIn(undefined, { callbackUrl: '/home' });
+      await signIn('zitadel');
 
-      expect(locationHref).toBe('/api/auth/signin?callbackUrl=%2Fhome');
-    });
-
-    it('should not append query string when callbackUrl is not provided', async () => {
-      const { signIn } = await import('../src/client.js');
-
-      await signIn('zitadel', {});
-
-      expect(locationHref).toBe('/api/auth/signin/zitadel');
-    });
-
-    it('should encode special characters in callbackUrl', async () => {
-      const { signIn } = await import('../src/client.js');
-
-      await signIn('zitadel', { callbackUrl: '/path?foo=bar&baz=qux' });
-
-      expect(locationHref).toBe(
-        '/api/auth/signin/zitadel?callbackUrl=%2Fpath%3Ffoo%3Dbar%26baz%3Dqux',
-      );
+      expect(fieldsOf(lastForm!)).not.toHaveProperty('callbackUrl');
     });
   });
 
   describe('signOut', () => {
-    it('should set window.location.href to /api/auth/signout', async () => {
+    it('submits a POST form to /api/auth/signout with the CSRF token', async () => {
       const { signOut } = await import('../src/client.js');
 
       await signOut();
 
-      expect(locationHref).toBe('/api/auth/signout');
+      expect(lastForm?.method).toBe('POST');
+      expect(lastForm?.action).toBe('/api/auth/signout');
+      expect(fieldsOf(lastForm!).csrfToken).toBe('test-csrf-token');
+      expect(submitCount).toBe(1);
     });
 
-    it('should append callbackUrl as encoded query param when provided', async () => {
+    it('includes callbackUrl as a hidden field when provided', async () => {
       const { signOut } = await import('../src/client.js');
 
       await signOut({ callbackUrl: '/' });
 
-      expect(locationHref).toBe('/api/auth/signout?callbackUrl=%2F');
+      expect(fieldsOf(lastForm!).callbackUrl).toBe('/');
     });
 
-    it('should append callbackUrl for a nested path', async () => {
+    it('omits callbackUrl when not provided', async () => {
       const { signOut } = await import('../src/client.js');
 
-      await signOut({ callbackUrl: '/goodbye' });
+      await signOut();
 
-      expect(locationHref).toBe('/api/auth/signout?callbackUrl=%2Fgoodbye');
-    });
-
-    it('should not append query string when callbackUrl is not provided', async () => {
-      const { signOut } = await import('../src/client.js');
-
-      await signOut({});
-
-      expect(locationHref).toBe('/api/auth/signout');
+      expect(fieldsOf(lastForm!)).not.toHaveProperty('callbackUrl');
     });
   });
 
   describe('module exports', () => {
-    it('should export signIn as a function', async () => {
+    it('exports signIn as a function', async () => {
       const { signIn } = await import('../src/client.js');
 
-      expect(signIn).toBeDefined();
       expect(typeof signIn).toBe('function');
     });
 
-    it('should export signOut as a function', async () => {
+    it('exports signOut as a function', async () => {
       const { signOut } = await import('../src/client.js');
 
-      expect(signOut).toBeDefined();
       expect(typeof signOut).toBe('function');
     });
   });
