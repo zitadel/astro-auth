@@ -4,12 +4,13 @@ import eslintPluginAstro from 'eslint-plugin-astro';
 export default [
   {
     ignores: [
-      'docs/**',
-      'src/components/index.d.ts',
-      'dist/**',
-      'build/**',
+      'coverage/**',
       '.out/**',
+      '.npm/**',
+      'docs/**',
       'playground/**',
+      // Repo-specific: generated component type definitions
+      'src/components/index.d.ts',
     ],
   },
   ...mridang.configs.recommended,
