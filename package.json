@@ -1,7 +1,7 @@
 {
   "name": "@zitadel/astro-auth",
   "description": "A comprehensive authentication integration for Astro applications with TypeScript support, framework-agnostic HTTP adapters, and role-based access control",
-  "version": "1.5.4",
+  "version": "1.5.5",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
